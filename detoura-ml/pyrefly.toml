@@ -1,0 +1,4 @@
+python-interpreter-path = ".venv312\\Scripts\\python.exe"
+search-path = [
+    "."
+]

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+numpy
+pandas
+scikit-learn
+firebase-admin
+huggingface-hub
+diskcache
+json_repair
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+llama-cpp-python

@@ -1,0 +1,7 @@
+models/
+*.gguf
+*.bin
+*.safetensors
+.venv/
+.venv*/
+__pycache__/

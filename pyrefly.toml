@@ -1,0 +1,4 @@
+python-interpreter-path = "D:\\Detoura\\detoura-ml\\.venv312\\Scripts\\python.exe"
+search-path = [
+    "detoura-ml"
+]

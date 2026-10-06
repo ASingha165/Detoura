@@ -1,0 +1,18 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: { 'secondary': '#3a6660', 'surface-dim': '#d8dae0', 'on-secondary-fixed-variant': '#214e49', 'surface-tint': '#a23e18', 'tertiary-fixed': '#ffddb4', 'on-surface-variant': '#57423b', 'outline-variant': '#dec0b7', 'surface-container-highest': '#e1e2e9', 'on-primary': '#ffffff', 'on-tertiary-fixed-variant': '#633f00', 'secondary-fixed': '#bdece4', 'inverse-on-surface': '#eff0f7', 'surface-container-low': '#f2f3fa', 'tertiary-fixed-dim': '#fcba5b', 'primary-fixed-dim': '#ffb59c', 'error-container': '#ffdad6', 'on-primary-container': '#fffbff', 'surface-container': '#eceef4', 'surface-container-lowest': '#ffffff', 'on-tertiary-fixed': '#291800', 'on-tertiary': '#ffffff', 'tertiary-container': '#9f6a0b', 'tertiary': '#7f5300', 'on-tertiary-container': '#fffbff', 'on-error-container': '#93000a', 'primary': '#9f3c16', 'on-secondary-container': '#3e6a65', 'primary-container': '#bf542c', 'background': '#f8f9ff', 'inverse-primary': '#ffb59c', 'on-secondary': '#ffffff', 'surface-container-high': '#e6e8ef', 'primary-fixed': '#ffdbcf', 'on-primary-fixed': '#390c00', 'on-error': '#ffffff', 'on-background': '#191c21', 'error': '#ba1a1a', 'outline': '#8a726a', 'surface-bright': '#f8f9ff', 'surface-variant': '#e1e2e9', 'secondary-container': '#bae9e2', 'surface': '#f8f9ff', 'secondary-fixed-dim': '#a1d0c8', 'inverse-surface': '#2e3136', 'on-secondary-fixed': '#00201d', 'on-surface': '#191c21', 'on-primary-fixed-variant': '#822801' },
+      borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' },
+      spacing: { 'space-2xl': '2rem', 'gutter-desktop': '1.5rem', 'space-xl': '1.5rem', 'space-3xl': '3rem', 'space-md': '1rem', 'space-4xl': '4rem', 'margin-mobile': '1rem', 'gutter-mobile': '1rem', 'margin-desktop': '3.5rem', 'space-lg': '1.25rem', 'margin-tablet': '2rem', 'space-2xs': '0.25rem', 'space-sm': '0.75rem', 'space-xs': '0.5rem' },
+      fontFamily: { 'headline-lg': ['Epilogue'], 'label-lg': ['Space Grotesk'], 'headline-md': ['Epilogue'], 'label-md': ['Space Grotesk'], 'headline-lg-mobile': ['Epilogue'], 'body-lg': ['Plus Jakarta Sans'], 'label-sm': ['Space Grotesk'], 'body-md': ['Plus Jakarta Sans'], 'body-sm': ['Plus Jakarta Sans'], 'headline-xl-mobile': ['Epilogue'], 'headline-xl': ['Epilogue'], 'headline-sm': ['Epilogue'] },
+      fontSize: { 'headline-lg': ['32px', { 'lineHeight': '40px', 'letterSpacing': '-0.015em', 'fontWeight': '600' }], 'label-lg': ['14px', { 'lineHeight': '18px', 'letterSpacing': '0.02em', 'fontWeight': '600' }], 'headline-md': ['24px', { 'lineHeight': '32px', 'letterSpacing': '-0.01em', 'fontWeight': '500' }], 'label-md': ['12px', { 'lineHeight': '16px', 'letterSpacing': '0.03em', 'fontWeight': '500' }], 'headline-lg-mobile': ['26px', { 'lineHeight': '32px', 'letterSpacing': '-0.01em', 'fontWeight': '600' }], 'body-lg': ['18px', { 'lineHeight': '28px', 'fontWeight': '400' }], 'label-sm': ['10px', { 'lineHeight': '14px', 'letterSpacing': '0.05em', 'fontWeight': '600' }], 'body-md': ['15px', { 'lineHeight': '24px', 'fontWeight': '400' }], 'body-sm': ['13px', { 'lineHeight': '20px', 'fontWeight': '400' }], 'headline-xl-mobile': ['32px', { 'lineHeight': '38px', 'letterSpacing': '-0.01em', 'fontWeight': '600' }], 'headline-xl': ['44px', { 'lineHeight': '52px', 'letterSpacing': '-0.02em', 'fontWeight': '600' }], 'headline-sm': ['20px', { 'lineHeight': '28px', 'fontWeight': '500' }] }
+    },
+  },
+  plugins: [],
+}

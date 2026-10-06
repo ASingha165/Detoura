@@ -1,0 +1,65 @@
+{
+  "destination": {
+    "id": "WB_DDI_009",
+    "name": "Banpara Forest Deer Park",
+    "district": "Dakshin Dinajpur",
+    "category": "Forest/Wildlife",
+    "latitude": 25.4786,
+    "longitude": 88.9072
+  },
+  "destination_intelligence": {
+    "match_score": 0.714,
+    "ssi": 0.984,
+    "live_cpi": 0.018,
+    "underrated_score": 0.293
+  },
+  "traveler": {
+    "travel_style": "Nature",
+    "place_preferences": [
+      "Forest/Wildlife",
+      "Nature"
+    ],
+    "budget_level": "Medium",
+    "travel_month": "October",
+    "trip_days": 3
+  },
+  "activities": [
+    {
+      "activity": "Wildlife and nature exploration",
+      "score": 1.0
+    },
+    {
+      "activity": "Nature photography",
+      "score": 1.0
+    },
+    {
+      "activity": "Forest walk",
+      "score": 0.8
+    },
+    {
+      "activity": "Bird watching",
+      "score": 0.8
+    },
+    {
+      "activity": "Scenic observation",
+      "score": 0.7
+    }
+  ],
+  "itinerary": {
+    "Day 1": {
+      "morning": "Wildlife and nature exploration",
+      "afternoon": "Nature photography",
+      "evening": "Relaxation / personal time"
+    },
+    "Day 2": {
+      "morning": "Scenic observation",
+      "afternoon": "Forest walk",
+      "evening": "Relaxation / personal time"
+    },
+    "Day 3": {
+      "morning": "Free time",
+      "afternoon": "Bird watching",
+      "evening": "Relaxation / personal time"
+    }
+  }
+}

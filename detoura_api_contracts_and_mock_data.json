@@ -1,0 +1,139 @@
+{
+  "project_meta": {
+    "name": "DETOURA",
+    "scope": "West Bengal, India",
+    "sprint_duration": "24 Hours (Extreme Hackathon)",
+    "target_platform": "MERN Stack + Spring Boot + FastAPI + Gemini API"
+  },
+  "database_schema": {
+    "collection_name": "destinations",
+    "fields": [
+      { "name": "destination_id", "type": "String", "key": "PRIMARY KEY", "description": "Unique identifier, e.g., WB_DAR_004" },
+      { "name": "name", "type": "String", "description": "Name of the destination" },
+      { "name": "district", "type": "String", "description": "District name (e.g., Darjeeling)" },
+      { "name": "category", "type": "String", "description": "Hill Station, Beach, Heritage, Forest/Wildlife, Cultural/Urban, Nature" },
+      { "name": "latitude", "type": "Double" },
+      { "name": "longitude", "type": "Double" },
+      { "name": "elevation_m", "type": "Double", "description": "Height above sea level (meters)" },
+      { "name": "slope_deg", "type": "Double", "description": "Terrain slope angle (degrees)" },
+      { "name": "avg_ndvi", "type": "Double", "description": "Normalized Difference Vegetation Index (0.0 to 1.0)" },
+      { "name": "accessibility_km_to_nh", "type": "Double", "description": "Distance to the nearest National Highway (km)" },
+      { "name": "osm_hotel_count", "type": "Integer", "description": "OSM hospitality count (carrying capacity proxy)" },
+      { "name": "osm_attraction_count", "type": "Integer", "description": "OSM attractions/POIs density count" },
+      { "name": "osm_restaurant_count", "type": "Integer" },
+      { "name": "historical_review_volume_proxy", "type": "Integer" },
+      { "name": "budget_tier", "type": "Integer", "description": "1 = Backpacker, 2 = Balanced, 3 = Comfort" },
+      { "name": "estimated_daily_inr", "type": "Integer" },
+      { "name": "thematic_preferences": {
+        "nature": "Double (0.0 to 1.0)",
+        "adventure": "Double (0.0 to 1.0)",
+        "culture": "Double (0.0 to 1.0)",
+        "relaxation": "Double (0.0 to 1.0)"
+      }},
+      { "name": "crowd_pressure_index", "type": "Double", "description": "Calculated unsupervised composite carrying capacity proxy (0.0 to 1.0)" },
+      { "name": "underrated_score", "type": "Double", "description": "AI-estimated Underrated Score (0.0 to 1.0)" },
+      { "name": "climate_temp_c", "type": "Array[Double]", "description": "12-element list of average monthly temperatures" },
+      { "name": "climate_rain_mm", "type": "Array[Double]", "description": "12-element list of average monthly rainfall" }
+    ]
+  },
+  "api_contracts": {
+    "fastapi_ml_endpoints": [
+      {
+        "endpoint": "POST /predict/recommendation",
+        "description": "Calculates content-based cosine similarity matches penalized by the Crowd Pressure Index.",
+        "request_schema": {
+          "user_preferences": {
+            "nature": 0.85,
+            "adventure": 0.40,
+            "culture": 0.20,
+            "relaxation": 0.90,
+            "max_crowd_tolerance": 0.30
+          },
+          "travel_month": 10,
+          "budget_tier": 2,
+          "top_k": 3
+        },
+        "response_schema": {
+          "status": "success",
+          "model_version": "1.2.0-spatial-cosine",
+          "recommendations": [
+            {
+              "destination_id": "WB_DAR_003",
+              "name": "Takdah",
+              "district": "Darjeeling",
+              "similarity_score": 0.892,
+              "underrated_score": 0.814,
+              "crowd_pressure_index": 0.210,
+              "season_suitability_score": 0.940,
+              "estimated_daily_cost_inr": 1600,
+              "primary_factors": ["High Vegetation Index", "Low Tourism Density", "Optimal Autumn Weather"]
+            }
+          ]
+        }
+      },
+      {
+        "endpoint": "POST /predict/crowd",
+        "description": "Exposes calculated Crowd Pressure Index dynamically for any custom coordinates.",
+        "request_schema": {
+          "osm_hotel_count": 8,
+          "osm_attraction_count": 5,
+          "historical_review_volume_proxy": 42
+        },
+        "response_schema": {
+          "crowd_pressure_index": 0.210,
+          "classification": "Low Density - Uncrowded"
+        }
+      },
+      {
+        "endpoint": "POST /predict/season",
+        "description": "Calculates the Season Suitability Score for a given destination and month based on climate bounds.",
+        "request_schema": {
+          "category": "Hill Station",
+          "elevation_m": 1600.0,
+          "travel_month": 10
+        },
+        "response_schema": {
+          "season_suitability_score": 0.940,
+          "temp_mean_c": 16.2,
+          "rainfall_mm": 15.0,
+          "weather_status": "Highly Favorable (Dry & Moderate)"
+        }
+      }
+    ],
+    "spring_boot_orchestration_endpoints": [
+      {
+        "endpoint": "POST /api/v1/recommendations",
+        "description": "Main client-facing gateway endpoint. Aggregates data from MongoDB, queries ML Microservices, and overlays Gemini Grounded explanations.",
+        "request_payload": {
+          "nature": 0.85,
+          "adventure": 0.40,
+          "culture": 0.20,
+          "relaxation": 0.90,
+          "max_crowd_tolerance": 0.30,
+          "travel_month": 10,
+          "budget_tier": 2
+        },
+        "response_payload": {
+          "user_id": "anon_user_101",
+          "timestamp": "2026-09-01T17:15:33Z",
+          "recommendations": [
+            {
+              "destination_id": "WB_DAR_003",
+              "name": "Takdah",
+              "district": "Darjeeling",
+              "category": "Hill Station",
+              "coordinates": { "latitude": 27.0384, "longitude": 88.3639 },
+              "elevation_m": 1600.0,
+              "avg_ndvi": 0.78,
+              "crowd_pressure_index": 0.210,
+              "underrated_score": 0.814,
+              "estimated_daily_cost_inr": 1600,
+              "similarity_score": 0.892,
+              "explainability_narrative": "Takdah is recommended because it perfectly matches your high nature and relaxation preference. Positioned at 1600m with a dense forest canopy (NDVI: 0.78), it remains highly scenic and uncrowded compared to central Darjeeling, with a Crowd Pressure Index of only 0.21."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

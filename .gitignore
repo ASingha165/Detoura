@@ -1,0 +1,82 @@
+# Virtual environments
+.venv/
+.venv*/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints/
+
+# LLM & Machine Learning models
+models/
+**/models/
+.cache/
+**/.cache/
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# Node / Frontend & Build
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+dist-ssr/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets, Environment & Credentials
+credentials/
+**/credentials/
+credentials/*.json
+**/credentials/*.json
+*service-account*.json
+*service_account*.json
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+private-key*.json
+client_secret*.json
+*.pem
+*.key
+*.p8
+*.p12
+*.secret
+*.token
+.env
+.env.*
+.env.local
+*.env
+*.env.*
+*.local
+
+# Archives & Temporary files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.log
+logs/
+**/logs/
+temp/
+tmp/
+
+# IDE and editors
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+*.sublime-project
+*.sublime-workspace
+
