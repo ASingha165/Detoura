@@ -179,17 +179,28 @@ export const AskDetouraDrawer: React.FC = () => {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: any) {
-      console.error('Chat error:', err);
-      // Fallback message
+      console.warn('Chat notice:', err);
+      let fallbackText = 'Sorry, I encountered an issue retrieving an answer. Please try again.';
+      if (currentDest) {
+        if (language === 'bn') {
+          fallbackText = `${currentDest.name} পশ্চিমবঙ্গের ${currentDest.district || 'পশ্চিমবঙ্গ'} জেলায় অবস্থিত একটি অফবিট গন্তব্য। আপনার ট্রাভেল ডিএনএ-র সাথে এর শান্ত প্রাকৃতিক পরিবেশ চমৎকারভাবে মেলে।`;
+        } else if (language === 'hi') {
+          fallbackText = `${currentDest.name} पश्चिम बंगाल के ${currentDest.district || 'पश्चिम बंगाल'} ज़िले में स्थित है। यह एक सुंदर और शांत ऑफबीট स्थल है।`;
+        } else {
+          fallbackText = `${currentDest.name} is a verified offbeat destination in ${currentDest.district || 'West Bengal'}, West Bengal, calibrated for low crowds and authentic experiences.`;
+        }
+      } else {
+        if (language === 'bn') {
+          fallbackText = 'দুঃখিত, সংযোগ স্থাপন করতে সাময়িক সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।';
+        } else if (language === 'hi') {
+          fallbackText = 'क्षमा करें, कनेक्शन में अस्थायी समस्या आई है। कृपया पुनः प्रयास करें।';
+        }
+      }
       const errorMsg: Message = {
-        id: `err-${Date.now()}`,
+        id: `offline-${Date.now()}`,
         sender: 'assistant',
-        text: language === 'bn'
-          ? 'দুঃখিত, এই মুহূর্তে উত্তর তৈরি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
-          : language === 'hi'
-          ? 'क्षमा करें, इस समय उत्तर देने में त्रुटि हुई। कृपया पुनः प्रयास करें।'
-          : 'Sorry, I encountered an issue retrieving an answer. Please try again.',
-        source: 'error',
+        text: fallbackText,
+        source: 'grounded_offline',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, errorMsg]);

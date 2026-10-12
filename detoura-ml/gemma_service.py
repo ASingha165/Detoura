@@ -8,12 +8,26 @@ import os
 import re
 import json
 import logging
+import math
+import threading
+import concurrent.futures
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger("detoura.gemma")
 
 DEFAULT_MODEL_PATH = Path(__file__).resolve().parent / "models" / "gemma-2-2b-it-Q4_K_M.gguf"
+
+
+def _safe_float(v: Any) -> Optional[float]:
+    """Safely converts an arbitrary value to a valid float or None."""
+    if v is None:
+        return None
+    try:
+        val = float(v)
+        return None if math.isnan(val) or math.isinf(val) else val
+    except (ValueError, TypeError):
+        return None
 
 
 class GemmaService:
@@ -23,6 +37,10 @@ class GemmaService:
         self.model_path = model_path or Path(os.getenv("GEMMA_MODEL_PATH", str(DEFAULT_MODEL_PATH)))
         self.llm = None
         self.is_loaded = False
+        self._intelligence_cache: Dict[str, Any] = {}
+        self._chat_cache: Dict[str, Any] = {}
+        self._inference_lock = threading.Lock()
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         self._initialize_model()
 
     @classmethod
@@ -44,11 +62,11 @@ class GemmaService:
             import llama_cpp
             logger.info(f"[GEMMA SERVICE] Loading Gemma model from {self.model_path}...")
             # n_ctx: 2048 tokens is lightweight and fast
-            # n_threads: 6 threads for multicore CPU inference
+            # n_threads: 4-6 threads for multicore CPU inference
             self.llm = llama_cpp.Llama(
                 model_path=str(self.model_path),
                 n_ctx=2048,
-                n_threads=6,
+                n_threads=int(os.getenv("GEMMA_THREADS", "4")),
                 verbose=False
             )
             self.is_loaded = True
@@ -57,6 +75,48 @@ class GemmaService:
             logger.error(f"[GEMMA SERVICE] Failed to load model ({e}). Fallback active.")
             self.llm = None
             self.is_loaded = False
+
+    def _run_inference_with_timeout(
+        self,
+        prompt: str,
+        max_tokens: int = 280,
+        temperature: float = 0.1,
+        top_p: float = 0.85,
+        repeat_penalty: float = 1.15,
+        stop: Optional[List[str]] = None,
+        timeout_sec: float = 15.0
+    ) -> Optional[str]:
+        """Runs llama_cpp inference serialized through a persistent worker with explicit timeout."""
+        if not self.is_loaded or self.llm is None:
+            return None
+
+        if not self._inference_lock.acquire(blocking=False):
+            logger.info("[GEMMA SERVICE] Inference engine busy with another task; serving fast fallback.")
+            return None
+
+        def _worker():
+            try:
+                return self.llm(
+                    prompt,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    repeat_penalty=repeat_penalty,
+                    stop=stop or ["<end_of_turn>", "</s>"]
+                )
+            finally:
+                self._inference_lock.release()
+
+        future = self._executor.submit(_worker)
+        try:
+            output = future.result(timeout=timeout_sec)
+            return output["choices"][0]["text"].strip()
+        except concurrent.futures.TimeoutError:
+            logger.warning(f"[GEMMA SERVICE] Inference timed out after {timeout_sec}s. Returning fast fallback.")
+            return None
+        except Exception as e:
+            logger.warning(f"[GEMMA SERVICE] Inference error: {e}. Returning fast fallback.")
+            return None
 
     def build_prompt(
         self,
@@ -77,7 +137,7 @@ class GemmaService:
         if not address:
             address = f"{dest_name}, {district}, {state}" if district else "Address unavailable in verified destination data."
 
-        user_dist = intelligence.get("distance_from_user_km") or destination.get("distance_from_user_km")
+        user_dist = _safe_float(intelligence.get("distance_from_user_km") or destination.get("distance_from_user_km"))
         if user_dist is not None:
             dist_str = f"{user_dist:.1f} km from traveler's live location"
         else:
@@ -398,39 +458,55 @@ MANDATORY GENERATION INSTRUCTIONS:
         """
         Generates structured Model 3 JSON recommendation.
         Validates language adherence and factual grounding; falls back safely if needed.
+        Includes in-memory caching and inference timeout to avoid blocking requests.
         """
         req_lang = (language or "en").lower().strip()
         if req_lang not in ("en", "hi", "bn"):
             req_lang = "en"
 
-        # 1. Attempt Gemma Inference if loaded
+        dest_id = str(destination.get("id") or destination.get("destination_id") or "WB_DEST_001")
+        trip_days = int(traveler.get("trip_days", 3))
+        user_dist = intelligence.get("distance_from_user_km") or destination.get("distance_from_user_km")
+        dist_key = f"dist_{round(float(user_dist), 1)}" if user_dist is not None else "nodist"
+        cache_key = f"{dest_id}:{trip_days}:{req_lang}:{dist_key}"
+
+        if cache_key in self._intelligence_cache:
+            logger.info(f"[GEMMA SERVICE] Cache hit for recommendation intelligence ({cache_key})")
+            return dict(self._intelligence_cache[cache_key])
+
+        # 1. Attempt Gemma Inference if loaded with strict timeout and compact token ceiling
         if self.is_loaded and self.llm is not None:
             try:
                 prompt = self.build_prompt(destination, intelligence, traveler, language=req_lang)
-                output = self.llm(
+                text = self._run_inference_with_timeout(
                     prompt,
-                    max_tokens=650,
+                    max_tokens=280,
                     temperature=0.1,  # Low temperature for strict factual adherence
                     top_p=0.85,
                     repeat_penalty=1.15,
-                    stop=["<end_of_turn>", "</s>"]
+                    stop=["<end_of_turn>", "</s>"],
+                    timeout_sec=15.0
                 )
-                text = output["choices"][0]["text"].strip()
-                parsed = self._clean_and_parse_json(text)
-                if parsed and "activities" in parsed and "itinerary" in parsed:
-                    if not self._validate_language(parsed, req_lang):
-                        logger.warning(f"[GEMMA SERVICE] Output failed '{req_lang}' language validation. Using localized fallback.")
+                if text:
+                    parsed = self._clean_and_parse_json(text)
+                    if parsed and "activities" in parsed and "itinerary" in parsed:
+                        if not self._validate_language(parsed, req_lang):
+                            logger.warning(f"[GEMMA SERVICE] Output failed '{req_lang}' language validation. Using localized fallback.")
+                        else:
+                            grounded_parsed = self._sanitize_factual_grounding(parsed, destination, language=req_lang)
+                            payload = self._assemble_payload(destination, intelligence, traveler, grounded_parsed, source="gemma", language=req_lang)
+                            self._intelligence_cache[cache_key] = payload
+                            return payload
                     else:
-                        grounded_parsed = self._sanitize_factual_grounding(parsed, destination, language=req_lang)
-                        return self._assemble_payload(destination, intelligence, traveler, grounded_parsed, source="gemma", language=req_lang)
-                else:
-                    logger.warning("[GEMMA SERVICE] Parsed output missing required keys. Triggering fallback.")
+                        logger.warning("[GEMMA SERVICE] Parsed output missing required keys. Triggering fallback.")
             except Exception as e:
                 logger.error(f"[GEMMA SERVICE] Inference error: {e}. Triggering fallback.")
 
         # 2. Deterministic High-Fidelity Localized Fallback
         fallback_data = self._generate_deterministic_fallback(destination, intelligence, traveler, language=req_lang)
-        return self._assemble_payload(destination, intelligence, traveler, fallback_data, source="deterministic_fallback", language=req_lang)
+        payload = self._assemble_payload(destination, intelligence, traveler, fallback_data, source="deterministic_fallback", language=req_lang)
+        self._intelligence_cache[cache_key] = payload
+        return payload
 
     def _clean_and_parse_json(self, raw_text: str) -> Optional[Dict[str, Any]]:
         """Safely extracts and parses JSON even if wrapped in markdown codeblocks or having syntax flaws."""
@@ -1099,8 +1175,8 @@ MANDATORY GENERATION INSTRUCTIONS:
         category = context.get("category") or "Nature & Heritage"
         lat = context.get("latitude")
         lon = context.get("longitude")
-        user_dist = context.get("distance_km") or context.get("distance_from_user_km")
-        dist_str = f"{float(user_dist):.1f} km from user's live location" if user_dist is not None else "Distance unavailable (traveler location not enabled)"
+        user_dist = _safe_float(context.get("distance_km") or context.get("distance_from_user_km"))
+        dist_str = f"{user_dist:.1f} km from user's live location" if user_dist is not None else "Distance unavailable (traveler location not enabled)"
         match_score = context.get("match_score")
         ssi = context.get("ssi")
         underrated = context.get("underrated_score")
@@ -1200,10 +1276,12 @@ Traveler Question:
         Guarantees instant, reliable, properly localized responses in en, hi, and bn.
         """
         lang = (language or "en").lower().strip()
-        dest_name = context.get("destination_name") or context.get("name") or "এই গন্তব্য" if lang == "bn" else "यह गंतव्य" if lang == "hi" else "this destination"
+        dest_name = (context.get("destination_name") or context.get("name") or "").strip()
+        if not dest_name:
+            dest_name = "এই গন্তব্য" if lang == "bn" else "यह गंतव्य" if lang == "hi" else "this destination"
         district = context.get("district") or "West Bengal"
-        user_dist = context.get("distance_km") or context.get("distance_from_user_km")
-        dist_str = f"{float(user_dist):.1f} কিমি" if lang == "bn" and user_dist is not None else f"{float(user_dist):.1f} किमी" if lang == "hi" and user_dist is not None else f"{float(user_dist):.1f} km" if user_dist is not None else None
+        user_dist = _safe_float(context.get("distance_km") or context.get("distance_from_user_km"))
+        dist_str = f"{user_dist:.1f} কিমি" if lang == "bn" and user_dist is not None else f"{user_dist:.1f} किमी" if lang == "hi" and user_dist is not None else f"{user_dist:.1f} km" if user_dist is not None else None
         
         msg_lower = message.lower()
 
@@ -1264,6 +1342,17 @@ Traveler Question:
         # 3. Itinerary inquiries
         elif any(k in msg_lower for k in ["পরিকল্পনা", "ইটিনারারি", "দিন", "ট্যুর", "itinerary", "plan", "day 1", "days", "योजना", "दिन"]):
             itinerary = context.get("itinerary", {})
+            if not itinerary and (dest_name and dest_name not in ["এই গন্তব্য", "यह गंतव्य", "this destination"]):
+                cat = str(context.get("category") or "Nature")
+                style = str(context.get("travel_style") or "Explorer")
+                fb = self._generate_deterministic_fallback(
+                    {"name": dest_name, "district": district, "category": cat},
+                    context,
+                    {"trip_days": 3, "travel_style": style},
+                    language=lang
+                )
+                itinerary = fb.get("itinerary", {})
+
             if lang == "bn":
                 if isinstance(itinerary, dict) and itinerary:
                     lines = []
@@ -1315,57 +1404,81 @@ Traveler Question:
         """
         Generates a grounded, localized conversational response using local Gemma 2B.
         Validates language adherence and falls back safely to guarantee 100% demo reliability.
+        Includes fast path for factual distance/itinerary queries and inference timeout.
         """
         lang = (language or "en").lower().strip()
         if lang not in ("en", "hi", "bn"):
             lang = "en"
 
+        dest_id = str(context.get("destination_id") or context.get("destination_name") or "default")
+        norm_msg = re.sub(r"\s+", " ", message.strip().lower())
+        cache_key = f"{dest_id}:{norm_msg}:{lang}"
+        if cache_key in self._chat_cache:
+            return dict(self._chat_cache[cache_key])
+
+        # Fast path for deterministic queries:
+        # Distance, itinerary, hotel pricing are strictly factual and instant (0ms latency, zero hallucinations)
+        is_deterministic_query = any(k in norm_msg for k in [
+            "দূরত্ব", "কত দূর", "দূর", "দূরে", "পথ", "রাস্তা", "direction", "distance", "how far", "route", "दूरी", "कितनी दूर",
+            "পরিকল্পনা", "ইটিনারারি", "দিন", "ট্যুর", "itinerary", "plan", "day 1", "days", "योजना",
+            "হোটেল", "রেস্তোরাঁ", "খাবার", "দাম", "ভাড়া", "আবাসন", "hotel", "stay", "room", "restaurant", "food", "price", "booking", "होटल", "किराया", "कमरा"
+        ])
+
+        if is_deterministic_query:
+            fallback_reply = self._generate_grounded_chat_fallback(message, context, language=lang)
+            res = {"response": fallback_reply, "language": lang, "source": "deterministic_grounded"}
+            self._chat_cache[cache_key] = res
+            return res
+
         if self.is_loaded and self.llm is not None:
             try:
                 prompt = self.build_chat_prompt(message, context, language=lang)
-                output = self.llm(
+                raw_reply = self._run_inference_with_timeout(
                     prompt,
-                    max_tokens=300,
+                    max_tokens=150,
                     temperature=0.1,
                     top_p=0.85,
                     repeat_penalty=1.15,
-                    stop=["<end_of_turn>", "</s>", "user\n", "\nTraveler Question:"]
+                    stop=["<end_of_turn>", "</s>", "user\n", "\nTraveler Question:"],
+                    timeout_sec=10.0
                 )
-                raw_reply = output["choices"][0]["text"].strip()
-                clean_reply = re.sub(r"^model\s*", "", raw_reply).strip()
-
-                # Check for degenerate repetition
-                words = clean_reply.split()
-                has_loop = False
-                if len(words) >= 8:
-                    for w_len in range(2, 6):
-                        for i in range(len(words) - 2 * w_len):
-                            if words[i:i+w_len] == words[i+w_len:i+2*w_len] == words[i+2*w_len:i+3*w_len]:
-                                has_loop = True
+                if raw_reply:
+                    clean_reply = re.sub(r"^model\s*", "", raw_reply).strip()
+                    # Check for repetitive loop
+                    words = clean_reply.split()
+                    has_loop = False
+                    if len(words) >= 8:
+                        for w_len in range(2, 6):
+                            for i in range(len(words) - 2 * w_len):
+                                if words[i:i+w_len] == words[i+w_len:i+2*w_len] == words[i+2*w_len:i+3*w_len]:
+                                    has_loop = True
+                                    break
+                            if has_loop:
                                 break
-                        if has_loop:
-                            break
 
-                if not has_loop:
-                    # Validate language script
-                    if lang == "bn":
-                        bn_chars = len(re.findall(r"[\u0980-\u09FF]", clean_reply))
-                        if bn_chars >= 8:
-                            return {"response": clean_reply, "language": "bn", "source": "gemma"}
-                        logger.warning(f"[GEMMA CHAT] Response lacked Bengali script ({bn_chars} chars). Using grounded fallback.")
-                    elif lang == "hi":
-                        hi_chars = len(re.findall(r"[\u0900-\u097F]", clean_reply))
-                        if hi_chars >= 8:
-                            return {"response": clean_reply, "language": "hi", "source": "gemma"}
-                        logger.warning(f"[GEMMA CHAT] Response lacked Hindi script ({hi_chars} chars). Using grounded fallback.")
-                    else:
-                        if len(clean_reply) > 5:
-                            return {"response": clean_reply, "language": "en", "source": "gemma"}
-                else:
-                    logger.warning("[GEMMA CHAT] Detected repetitive phrase loop in generation. Using grounded fallback.")
+                    if not has_loop:
+                        if lang == "bn":
+                            bn_chars = len(re.findall(r"[\u0980-\u09FF]", clean_reply))
+                            if bn_chars >= 8:
+                                res = {"response": clean_reply, "language": "bn", "source": "gemma"}
+                                self._chat_cache[cache_key] = res
+                                return res
+                        elif lang == "hi":
+                            hi_chars = len(re.findall(r"[\u0900-\u097F]", clean_reply))
+                            if hi_chars >= 8:
+                                res = {"response": clean_reply, "language": "hi", "source": "gemma"}
+                                self._chat_cache[cache_key] = res
+                                return res
+                        else:
+                            if len(clean_reply) > 5:
+                                res = {"response": clean_reply, "language": "en", "source": "gemma"}
+                                self._chat_cache[cache_key] = res
+                                return res
             except Exception as e:
                 logger.error(f"[GEMMA CHAT] Inference error: {e}. Using grounded fallback.")
 
         # High-fidelity grounded fallback
         fallback_reply = self._generate_grounded_chat_fallback(message, context, language=lang)
-        return {"response": fallback_reply, "language": lang, "source": "gemma_grounded_fallback"}
+        res = {"response": fallback_reply, "language": lang, "source": "gemma_grounded_fallback"}
+        self._chat_cache[cache_key] = res
+        return res

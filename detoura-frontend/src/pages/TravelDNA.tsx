@@ -266,13 +266,32 @@ export default function TravelDNA() {
       setRecommendations(response);
       navigate("/recommendations");
     } catch (error: any) {
-      console.error('BuildDetoura error:', error);
-      const isFetchError = error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError');
-      if (isFetchError) {
-        setApiError("Unable to connect to the DETOURA ML service (port 8000). Please ensure the backend server is running.");
-      } else {
-        setApiError(error?.message || "Failed to generate recommendations. Please try again.");
+      console.warn('[TRAVEL DNA] Backend notice, falling back to local Model 2 recommendations:', error);
+      try {
+        const offlineRecs = await getRecommendations({
+          user_prefs: {
+            adventure: food / 100,
+            nature: nature / 100,
+            relaxation: relax / 100,
+            culture: culture / 100,
+          },
+          weights: { w_sim: 1.0, w_season: 1.0, w_crowd: 1.0, w_gem: 1.0 },
+          month: activeTravelMonth,
+          place_types: selectedPlaceTypes,
+          budget_max: selectedBudgetMax,
+          budget_tier: selectedBudgetTier !== 'all' ? selectedBudgetTier : undefined,
+          trip_days: tripDays,
+          language: language,
+        });
+        if (offlineRecs && offlineRecs.length > 0) {
+          setRecommendations(offlineRecs);
+          navigate("/recommendations");
+          return;
+        }
+      } catch (fallbackErr) {
+        console.error('[TRAVEL DNA] Offline fallback error:', fallbackErr);
       }
+      setApiError(error?.message || "Unable to generate recommendations. Please check your preferences and try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -342,21 +361,22 @@ export default function TravelDNA() {
             <div className="mb-space-sm p-3 rounded-xl bg-error-container text-on-error-container font-body-sm text-body-sm flex flex-col gap-2 animate-fadeIn">
               <div className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
-                <div className="flex-1">
+                <div className="flex-1 break-words">
+                  <span className="font-semibold block mb-0.5">Recommendation Service Notice</span>
                   <span>{apiError}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 pl-7">
+              <div className="flex items-center gap-2 pl-7 flex-wrap">
                 <button
                   type="button"
                   onClick={handleBuildDetoura}
-                  className="px-3 py-1 bg-error text-on-error rounded-lg font-label-sm text-label-sm font-semibold hover:opacity-90 transition-opacity"
+                  className="px-3 py-1.5 bg-error text-on-error rounded-lg font-label-sm text-label-sm font-semibold hover:opacity-90 transition-opacity"
                 >
                   Retry
                 </button>
                 <Link
-                  to="/catalog"
-                  className="px-3 py-1 bg-surface-container text-on-surface rounded-lg font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-colors"
+                  to="/explore"
+                  className="px-3 py-1.5 bg-surface-container text-on-surface rounded-lg font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-colors"
                 >
                   Explore Offline Catalog
                 </Link>

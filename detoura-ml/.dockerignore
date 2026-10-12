@@ -1,0 +1,38 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+.venv*/
+venv/
+ENV/
+env/
+
+# Version control & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Secret & credential files - NEVER BAKE SECRETS INTO DOCKER IMAGE
+credentials/
+*.json
+!data/*.json
+.env*
+*.key
+*.pem
+
+# Test & inspection scripts not needed at runtime
+test_*.py
+inspect_*.py
+check_*.py
+deploy_rules.py
+update_authorized_domains.py
+
+# Local logs & cache
+*.log
+models/.cache/

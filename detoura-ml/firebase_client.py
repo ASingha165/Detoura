@@ -14,10 +14,16 @@ def init_firebase():
         project_id = os.environ.get('FIREBASE_PROJECT_ID', 'detoura-f8a96')
         
         try:
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred, {
-                'projectId': project_id,
-            })
+            if cred_path and os.path.exists(cred_path):
+                cred = credentials.Certificate(cred_path)
+                firebase_admin.initialize_app(cred, {
+                    'projectId': project_id,
+                })
+            else:
+                # Use Application Default Credentials (ADC) when running on Google Cloud Run
+                firebase_admin.initialize_app(options={
+                    'projectId': project_id,
+                })
         except Exception as e:
             print(f"Error initializing Firebase: {e}")
             raise e

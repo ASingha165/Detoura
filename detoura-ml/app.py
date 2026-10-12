@@ -282,25 +282,48 @@ app = FastAPI(
 
 from fastapi.middleware.cors import CORSMiddleware
 
-# Development CORS configuration (same-origin production does not require CORS)
+# Production and Development CORS configuration
+cors_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://detoura.vercel.app",
+    "https://detoura-f8a96.web.app",
+    "https://detoura-f8a96.firebaseapp.com",
+]
+env_cors = os.getenv("CORS_ORIGINS", "")
+if env_cors:
+    cors_origins.extend([origin.strip() for origin in env_cors.split(",") if origin.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ],
+    allow_origins=cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Paths relative to the project root
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = ROOT_DIR / "detoura_master-v2.db"
-if not DB_PATH.exists():
-    DB_PATH = ROOT_DIR / "detoura_master-v2"
+# Paths relative to the project root and current microservice directory
+APP_DIR = Path(__file__).resolve().parent
+ROOT_DIR = APP_DIR.parent
+
+# Robust DB_PATH resolution (supports containerized microservice and local repo)
+db_env = os.getenv("DETOURA_DB_PATH")
+if db_env and Path(db_env).is_file():
+    DB_PATH = Path(db_env)
+elif (APP_DIR / "detoura_master-v2.db").is_file():
+    DB_PATH = APP_DIR / "detoura_master-v2.db"
+elif (ROOT_DIR / "detoura_master-v2.db").is_file():
+    DB_PATH = ROOT_DIR / "detoura_master-v2.db"
+elif (APP_DIR / "data" / "detoura_master-v2.db").is_file():
+    DB_PATH = APP_DIR / "data" / "detoura_master-v2.db"
+else:
+    DB_PATH = APP_DIR / "detoura_master-v2.db"
+
+# In-memory recommendation cache for deterministic Model 2 calculations
+_recommend_cache: Dict[str, Any] = {}
 
 FRONTEND_DIST = ROOT_DIR / "detoura-frontend" / "dist"
 if (FRONTEND_DIST / "assets").exists():
@@ -748,6 +771,21 @@ def get_recommendations(request: RecommendRequest):
 
     try:
         clean_tier = normalize_budget_tier(request.budget_tier)
+        cache_key = json.dumps({
+            "prefs": request.user_prefs.model_dump(),
+            "weights": request.weights.model_dump(),
+            "month": request.month,
+            "temp": request.month_temp,
+            "rain": request.month_rain,
+            "place_types": sorted(request.place_types or []),
+            "budget_max": request.budget_max,
+            "budget_tier": clean_tier,
+            "user_lat": round(request.user_lat, 2) if request.user_lat is not None else None,
+            "user_lon": round(request.user_lon, 2) if request.user_lon is not None else None,
+        }, sort_keys=True)
+        if cache_key in _recommend_cache:
+            return _recommend_cache[cache_key]
+
         # Pass the validated request parameters to the core model pipeline
         df_results = recommend_destinations(
             user_prefs=request.user_prefs.model_dump(),
@@ -860,6 +898,9 @@ def get_recommendations(request: RecommendRequest):
                     }
                 )
             )
+        if len(_recommend_cache) >= 200:
+            _recommend_cache.pop(next(iter(_recommend_cache)))
+        _recommend_cache[cache_key] = response
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Recommendation Error: {str(e)}")
@@ -1145,11 +1186,14 @@ def get_intelligence_recommendations(request: MultiModelRecommendRequest):
             "district": dest_obj["district"],
             "state": "West Bengal"
         }
-    if "user_distance" not in payload or payload["user_distance"] is None:
-        payload["user_distance"] = {
-            "distance_km": top_user_dist,
-            "available": top_user_dist is not None
-        }
+    payload["user_distance"] = {
+        "distance_km": top_user_dist,
+        "available": top_user_dist is not None
+    }
+    if "destination_intelligence" in payload and isinstance(payload["destination_intelligence"], dict):
+        payload["destination_intelligence"]["distance_from_user_km"] = top_user_dist
+    if "destination" in payload and isinstance(payload["destination"], dict):
+        payload["destination"]["distance_from_user_km"] = top_user_dist
     return payload
 
 @app.post("/api/chat", response_model=ChatResponse)

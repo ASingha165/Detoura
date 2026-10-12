@@ -9,7 +9,9 @@
         "authorizedRedirectUris": [
           "http://localhost",
           "http://127.0.0.1",
-          "https://detoura-f8a96.firebaseapp.com"
+          "https://detoura-f8a96.firebaseapp.com",
+          "https://detoura-f8a96.web.app",
+          "https://detoura.vercel.app"
         ]
       }
     }

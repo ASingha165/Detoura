@@ -19,7 +19,7 @@ def ensure_authorized_domains():
         config = json.loads(resp.read().decode())
     
     current_domains = set(config.get('authorizedDomains', []))
-    required_domains = {'localhost', '127.0.0.1', 'detoura-f8a96.firebaseapp.com', 'detoura-f8a96.web.app'}
+    required_domains = {'localhost', '127.0.0.1', 'detoura-f8a96.firebaseapp.com', 'detoura-f8a96.web.app', 'detoura.vercel.app'}
     
     if not required_domains.issubset(current_domains):
         all_domains = sorted(list(current_domains.union(required_domains)))

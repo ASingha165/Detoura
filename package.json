@@ -1,0 +1,12 @@
+{
+  "name": "detoura",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.js",
+    "dev:frontend": "npm --prefix detoura-frontend run dev",
+    "dev:backend": "cd detoura-ml && .\\.venv312\\Scripts\\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload",
+    "build": "npm --prefix detoura-frontend run build",
+    "lint": "npm --prefix detoura-frontend run lint"
+  }
+}

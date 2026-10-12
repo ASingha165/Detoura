@@ -162,12 +162,15 @@ def load_destinations(db_path: Path) -> pd.DataFrame:
     ]
     resolved_path = None
     for p in candidate_paths:
-        if p.exists() and p.stat().st_size > 0:
-            resolved_path = p
-            break
+        try:
+            if p.is_file() and p.stat().st_size > 0:
+                resolved_path = p
+                break
+        except Exception:
+            continue
 
     if not resolved_path:
-        resolved_path = Path(db_path)
+        resolved_path = Path(__file__).resolve().parent / "detoura_master-v2.db"
 
     try:
         conn = sqlite3.connect(resolved_path)
