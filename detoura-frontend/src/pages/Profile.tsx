@@ -93,7 +93,7 @@ export default function Profile() {
                   <h1 className="font-headline-sm text-headline-sm text-on-surface truncate">{displayName}</h1>
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
                     <span className="material-symbols-outlined text-[13px]">verified_user</span>
-                    {user?.provider === 'google' ? 'Google' : 'Passport'}
+                    {user?.provider === 'google' ? t('common.google') : t('common.passport')}
                   </span>
                 </div>
                 <p className="font-label-md text-label-md text-secondary font-medium tracking-wide mt-0.5 truncate">
@@ -102,7 +102,7 @@ export default function Profile() {
                 <div className="flex flex-col gap-1 mt-2 text-on-surface-variant font-label-sm text-label-sm">
                   <div className="inline-flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-secondary animate-ping opacity-75"></span>
-                    <span className="truncate">Firebase Auth ({user?.provider === 'google' ? 'Google' : 'Email/Password'})</span>
+                    <span className="truncate">Firebase Auth ({user?.provider === 'google' ? t('common.google') : 'Email/Password'})</span>
                   </div>
                   {user?.uid && (
                     <span className="font-mono text-[11px] text-on-surface-variant/80 truncate">
@@ -168,31 +168,31 @@ export default function Profile() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-secondary text-[20px]">psychology</span>
-                  <h2 className="font-headline-sm text-headline-sm text-on-surface">Travel DNA</h2>
+                  <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('nav.travelDna')}</h2>
                 </div>
                 <Link
                   to="/travel-dna"
                   className="text-primary font-label-sm text-label-sm font-semibold hover:underline flex items-center gap-0.5"
                 >
-                  <span>Edit DNA</span>
+                  <span>{t('profile.editDna')}</span>
                   <span className="material-symbols-outlined text-[14px]">chevron_right</span>
                 </Link>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 <div className="p-2 rounded-lg bg-surface-container-low text-center">
-                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">Nature</span>
+                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">{t('profile.nature')}</span>
                   <span className="font-headline-sm text-headline-sm font-bold text-secondary">{travelDna.nature ?? 85}%</span>
                 </div>
                 <div className="p-2 rounded-lg bg-surface-container-low text-center">
-                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">Serenity</span>
+                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">{t('profile.serenity')}</span>
                   <span className="font-headline-sm text-headline-sm font-bold text-secondary">{travelDna.relaxation ?? 90}%</span>
                 </div>
                 <div className="p-2 rounded-lg bg-surface-container-low text-center">
-                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">Culture</span>
+                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">{t('profile.culture')}</span>
                   <span className="font-headline-sm text-headline-sm font-bold text-primary">{travelDna.culture ?? 70}%</span>
                 </div>
                 <div className="p-2 rounded-lg bg-surface-container-low text-center">
-                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">Adventure</span>
+                  <span className="text-[11px] uppercase tracking-wider text-on-surface-variant block">{t('profile.adventure')}</span>
                   <span className="font-headline-sm text-headline-sm font-bold text-tertiary">{travelDna.adventure ?? 65}%</span>
                 </div>
               </div>
@@ -239,7 +239,7 @@ export default function Profile() {
                     <div className="min-w-0 flex-1">
                       <span className="inline-flex items-center gap-1 text-primary font-label-sm text-label-sm uppercase tracking-wider font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        {trip.district || 'West Bengal'} &bull; {trip.category || 'Spot'}
+                        {trip.district || 'West Bengal'} &bull; {trip.category || t('common.spot')}
                       </span>
                       <h3 className="font-headline-md text-headline-md text-on-surface mt-1 truncate">{trip.name}</h3>
                       <div className="flex items-center gap-3 mt-1 text-on-surface-variant font-label-md text-label-md">
@@ -271,7 +271,7 @@ export default function Profile() {
                         try {
                           await removeTrip(trip.destination_id);
                         } catch (err: any) {
-                          alert(err?.message || 'Failed to remove saved trip.');
+                          alert(err?.message || t('common.failedToRemoveTrip'));
                         }
                       }}
                       className="py-1.5 px-3 rounded-lg text-error hover:bg-error-container hover:text-on-error-container font-label-md text-label-md transition-colors cursor-pointer"

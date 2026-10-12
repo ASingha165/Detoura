@@ -705,7 +705,7 @@ export default function DestinationDetail() {
                           : 'bg-surface-container-low text-on-surface hover:bg-surface-container'
                       }`}
                     >
-                      {dayKey}
+                      {dayKey.startsWith('Day ') ? `${t('destinationDetail.dayPrefix')} ${dayKey.replace('Day ', '')}` : dayKey}
                     </button>
                   ))}
                 </div>
@@ -723,7 +723,7 @@ export default function DestinationDetail() {
                     >
                       <div className="flex items-center justify-between border-b border-surface-container pb-2">
                         <span className="font-headline-sm text-headline-sm text-primary font-bold">
-                          {dayKey}
+                          {dayKey.startsWith('Day ') ? `${t('destinationDetail.dayPrefix')} ${dayKey.replace('Day ', '')}` : dayKey}
                         </span>
                         <span className="text-[11px] font-semibold text-secondary-fixed-variant bg-secondary-fixed/40 px-2.5 py-0.5 rounded-full">
                           {t('destinationDetail.timeSlotsBadge')}
@@ -741,13 +741,13 @@ export default function DestinationDetail() {
                               {t('destinationDetail.morningSlot')}
                             </span>
                             <p className="font-body-md text-body-md text-on-surface mt-0.5 leading-relaxed">
-                              {dayPlan.morning || 'Early morning arrival and refreshing walk through the surrounding nature and scenic viewpoint.'}
+                              {dayPlan.morning || t('destinationDetail.morningFallback')}
                             </p>
                           </div>
                         </div>
 
                         {/* Afternoon */}
-                        <div className="flex items-start gap-3 p-2.5 rounded-xl bg-primary-fixed/50 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                        <div className="flex items-start gap-3 p-2.5 rounded-xl bg-surface-container-low/60">
                           <div className="w-8 h-8 rounded-lg bg-primary-fixed/50 text-primary flex items-center justify-center shrink-0 mt-0.5">
                             <span className="material-symbols-outlined text-[18px]">wb_sunny</span>
                           </div>
@@ -756,7 +756,7 @@ export default function DestinationDetail() {
                               {t('destinationDetail.afternoonSlot')}
                             </span>
                             <p className="font-body-md text-body-md text-on-surface mt-0.5 leading-relaxed">
-                              {dayPlan.afternoon || 'Local regional culinary tasting followed by curated activities and cultural exploration.'}
+                              {dayPlan.afternoon || t('destinationDetail.afternoonFallback')}
                             </p>
                           </div>
                         </div>
@@ -771,7 +771,7 @@ export default function DestinationDetail() {
                               {t('destinationDetail.eveningSlot')}
                             </span>
                             <p className="font-body-md text-body-md text-on-surface mt-0.5 leading-relaxed">
-                              {dayPlan.evening || 'Relaxing sunset experience, tranquil riverside or forest stargazing, and authentic homestay dinner.'}
+                              {dayPlan.evening || t('destinationDetail.eveningFallback')}
                             </p>
                           </div>
                         </div>
@@ -868,8 +868,13 @@ export default function DestinationDetail() {
                   localizedHighlight = `${t('destinationDetail.district')}: ${highlight.replace('District:', '').trim()}`;
                 } else if (highlight.startsWith('Vibe:')) {
                   localizedHighlight = `${t('destinationDetail.vibe')}: ${highlight.replace('Vibe:', '').trim()}`;
-                } else if (highlight === 'Budget Friendly' || highlight === 'Moderate Comfort' || highlight === 'Premium Heritage') {
-                  localizedHighlight = `${t('destinationDetail.comfort')}: ${highlight}`;
+                } else if (highlight === 'Budget Friendly' || highlight === 'Moderate Comfort' || highlight === 'Premium Heritage' || highlight === 'Comfortable Stay') {
+                  const comfortLabel = highlight === 'Budget Friendly'
+                    ? t('destinationDetail.budgetFriendly')
+                    : highlight === 'Premium Heritage'
+                    ? t('destinationDetail.premiumHeritage')
+                    : t('destinationDetail.moderateComfort');
+                  localizedHighlight = `${t('destinationDetail.comfort')}: ${comfortLabel}`;
                 }
                 return (
                   <li key={idx} className="flex items-start gap-2 font-body-md text-on-surface-variant">

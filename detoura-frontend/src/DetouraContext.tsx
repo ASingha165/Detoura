@@ -136,6 +136,12 @@ export function DetouraProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('detoura_language', lang);
   };
 
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = language;
+    }
+  }, [language]);
+
   const t = (keyPath: string, fallback?: string) => {
     return translate(language, keyPath, fallback);
   };

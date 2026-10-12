@@ -10,12 +10,12 @@ import DestinationImage from '../components/DestinationImage';
 import { useTranslation } from '../DetouraContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const CATEGORIES = [
-  { id: 'All', label: 'All Destinations' },
-  { id: 'Hill Station', label: 'Hills & Ridges' },
-  { id: 'Wildlife', label: 'Nature & Wild' },
-  { id: 'Coastal', label: 'Coastal & Beaches' },
-  { id: 'Heritage', label: 'Heritage & Temples' }
+const CATEGORIES_DEF = [
+  { id: 'All', key: 'explore.categoryAll', fallback: 'All Destinations' },
+  { id: 'Hill Station', key: 'explore.categoryHills', fallback: 'Hills & Ridges' },
+  { id: 'Wildlife', key: 'explore.categoryWild', fallback: 'Nature & Wild' },
+  { id: 'Coastal', key: 'explore.categoryCoastal', fallback: 'Coastal & Beaches' },
+  { id: 'Heritage', key: 'explore.categoryHeritage', fallback: 'Heritage & Temples' }
 ];
 
 export default function Explore() {
@@ -23,6 +23,14 @@ export default function Explore() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const mapSectionRef = useRef<HTMLElement>(null);
+
+  const categories = useMemo(() => 
+    CATEGORIES_DEF.map((c) => ({
+      id: c.id,
+      label: t(c.key, c.fallback)
+    })),
+    [t]
+  );
 
   const [allDestinations, setAllDestinations] = useState<PublicDestination[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -180,10 +188,10 @@ export default function Explore() {
 
           <div>
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface tracking-tight">
-              {user ? `Good morning, ${user.displayName || user.email?.split('@')[0]}` : 'Discover West Bengal'}
+              {user ? `${t('explore.goodMorning')}, ${user.displayName || user.email?.split('@')[0]}` : t('explore.discoverBengal')}
             </h1>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-              {user ? 'Where will you detour today?' : 'Curated regional travel intelligence & hidden gems.'}
+              {user ? t('explore.whereDetourToday') : t('explore.curatedRegionalIntel')}
             </p>
           </div>
 
@@ -239,7 +247,7 @@ export default function Explore() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-primary text-[20px]">map</span>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Topographic Navigator</h2>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('explore.topographicNavigator')}</h2>
             </div>
             <span className="font-label-md text-label-md text-secondary font-semibold uppercase tracking-wider">
               West Bengal ({filteredDestinations.length})
@@ -248,7 +256,7 @@ export default function Explore() {
 
           {/* Category Filter Chips */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const isActive = selectedCategory === cat.id;
               return (
                 <button
@@ -288,7 +296,7 @@ export default function Explore() {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-[10px] font-bold uppercase tracking-wider shadow-xs">
-                  Active Selection
+                  {t('explore.activeSelection')}
                 </div>
                 <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white font-label-sm text-[10px]">
                   {selectedDestination.district || 'West Bengal'}
@@ -299,7 +307,7 @@ export default function Explore() {
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider truncate">
-                      {selectedDestination.category || 'Curated Spot'}
+                      {selectedDestination.category || t('common.spot')}
                     </span>
                     <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">
                       ID: {selectedDestination.destination_id}
@@ -309,7 +317,7 @@ export default function Explore() {
                     {selectedDestination.name}
                   </h3>
                   <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">
-                    {selectedDestination.district} district • Tier {selectedDestination.budget_tier} • Underrated score: {Math.round((selectedDestination.underrated_score || 0.5) * 100)}% • Crowd pressure: {Math.round((selectedDestination.crowd_pressure_index || 0.4) * 100)}%
+                    {selectedDestination.district} • Tier {selectedDestination.budget_tier} • {t('recommendations.offbeatLabel')}: {Math.round((selectedDestination.underrated_score || 0.5) * 100)}% • {t('recommendations.crowdPressureLabel')}: {Math.round((selectedDestination.crowd_pressure_index || 0.4) * 100)}%
                   </p>
                 </div>
 
@@ -317,7 +325,7 @@ export default function Explore() {
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-secondary"></span>
                     <span className="font-label-md text-label-md text-on-surface font-semibold">
-                      ₹{Math.round(selectedDestination.estimated_daily_inr || 1800)}/day
+                      ₹{Math.round(selectedDestination.estimated_daily_inr || 1800)}{t('common.perDay')}
                     </span>
                   </div>
 
@@ -328,13 +336,13 @@ export default function Explore() {
                       className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-colors active:scale-95 shadow-xs flex items-center gap-1 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span>View Pin</span>
+                      <span>{t('explore.viewPin')}</span>
                     </button>
                     <button
                       onClick={handleBuildDetoura}
                       className="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold transition-colors active:scale-95 flex items-center gap-1 cursor-pointer"
                     >
-                      <span>Plan Trip</span>
+                      <span>{t('explore.planTrip')}</span>
                       <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                     </button>
                   </div>
@@ -344,7 +352,7 @@ export default function Explore() {
           ) : (
             <div className="mt-2 p-6 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-center flex flex-col items-center">
               <span className="material-symbols-outlined text-[28px] text-on-surface-variant mb-1">travel_explore</span>
-              <p className="font-body-md text-on-surface font-medium">No destinations match this category filter</p>
+              <p className="font-body-md text-on-surface font-medium">{t('explore.noDestMatchCategory')}</p>
               <button
                 onClick={() => {
                   setSelectedCategory('All');
@@ -352,7 +360,7 @@ export default function Explore() {
                 }}
                 className="mt-3 px-4 py-1.5 rounded-xl bg-secondary text-on-secondary font-label-md font-semibold cursor-pointer"
               >
-                Reset Filter
+                {t('explore.resetFilter')}
               </button>
             </div>
           )}
@@ -362,16 +370,16 @@ export default function Explore() {
         <section className="mt-6 flex flex-col gap-3">
           <div className="px-margin-mobile flex items-center justify-between">
             <div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Curated Highlights</h2>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('explore.offbeatHighlights')}</h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Select any destination card to navigate to its pin on the map
+                {t('explore.offbeatSubhead')}
               </p>
             </div>
             <button
               onClick={handleBuildDetoura}
               className="font-label-md text-label-md text-primary font-semibold flex items-center gap-0.5 cursor-pointer"
             >
-              Tune DNA <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              {t('explore.tuneDna')} <span className="material-symbols-outlined text-[16px]">chevron_right</span>
             </button>
           </div>
 
@@ -402,7 +410,7 @@ export default function Explore() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                     <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                       <span className="px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-bold uppercase tracking-wider">
-                        {Math.min(Math.max(Math.round(((dest.detoura_score || 1.2) / 2.5) * 100), 50), 99)}% Match
+                        {Math.min(Math.max(Math.round(((dest.detoura_score || 1.2) / 2.5) * 100), 50), 99)}% {t('common.match')}
                       </span>
                       <span className="px-2 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface font-label-sm text-label-sm font-medium">
                         {dest.district || 'West Bengal'}
@@ -414,7 +422,7 @@ export default function Explore() {
                         <span>{dest.district}</span>
                       </span>
                       <span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-black/40 backdrop-blur-xs text-primary-fixed-dim shrink-0">
-                        {dest.category || 'Spot'}
+                        {dest.category || t('common.spot')}
                       </span>
                     </div>
                   </div>
@@ -425,7 +433,7 @@ export default function Explore() {
                         {dest.name}
                       </h3>
                       <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-1">
-                        Authentic regional destination in {dest.district}. Calibrated for serene detours away from high congestion.
+                        {t('explore.authenticDestinationIn')} {dest.district}.
                       </p>
                     </div>
 
@@ -433,7 +441,7 @@ export default function Explore() {
                       <div className="flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-secondary"></span>
                         <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">
-                          ₹{Math.round(dest.estimated_daily_inr || 1800)}/day
+                          ₹{Math.round(dest.estimated_daily_inr || 1800)}{t('common.perDay')}
                         </span>
                       </div>
                       <button
@@ -447,7 +455,7 @@ export default function Explore() {
                             : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'
                         }`}
                       >
-                        <span>View Pin</span>
+                        <span>{t('explore.viewPin')}</span>
                         <span className="material-symbols-outlined text-[16px]">location_on</span>
                       </button>
                     </div>
@@ -463,10 +471,10 @@ export default function Explore() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-tertiary text-[20px]">diamond</span>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Hidden Gems of Bengal</h2>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('explore.hiddenGemsTitle')}</h2>
             </div>
             <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-              Real Data ({hiddenGems.length})
+              {t('explore.realData')} ({hiddenGems.length})
             </span>
           </div>
 
@@ -493,7 +501,7 @@ export default function Explore() {
                       className="w-full h-full object-cover"
                     />
                     <span className="absolute top-1 left-1 px-1 py-0.5 rounded bg-black/60 text-white font-label-sm text-[8px] font-bold">
-                      {gem.category?.split(' ')[0] || 'Gem'}
+                      {gem.category?.split(' ')[0] || t('common.gem')}
                     </span>
                   </div>
 
@@ -503,14 +511,14 @@ export default function Explore() {
                         {gem.district}
                       </span>
                       <span className="font-label-sm text-[11px] font-semibold text-primary">
-                        ₹{Math.round(gem.estimated_daily_inr || 1600)}/d
+                        ₹{Math.round(gem.estimated_daily_inr || 1600)}{t('common.perDay')}
                       </span>
                     </div>
                     <h3 className="font-headline-sm text-[15px] leading-snug text-on-surface font-semibold truncate mt-0.5">
                       {gem.name}
                     </h3>
                     <p className="font-body-sm text-[12px] text-on-surface-variant line-clamp-1 mt-0.5">
-                      High tranquility score • {Math.round((gem.underrated_score || 0.8) * 100)}% offbeat quotient in {gem.district}.
+                      {t('explore.tranquilityQuotient')} • {Math.round((gem.underrated_score || 0.8) * 100)}% {gem.district}.
                     </p>
                     <div className="flex items-center justify-between mt-1.5 text-on-surface-variant font-label-sm text-[11px]">
                       <span className="flex items-center gap-0.5 truncate">
@@ -524,7 +532,7 @@ export default function Explore() {
                         }}
                         className="text-primary font-semibold hover:underline flex items-center gap-0.5 cursor-pointer"
                       >
-                        <span>Pin on Map</span>
+                        <span>{t('explore.pinOnMap')}</span>
                         <span className="material-symbols-outlined text-[13px]">my_location</span>
                       </button>
                     </div>
@@ -541,17 +549,17 @@ export default function Explore() {
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-primary text-[18px]">auto_awesome</span>
-                <span className="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wide">Custom Bengal Detour</span>
+                <span className="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wide">{t('explore.customBengalDetour')}</span>
               </div>
-              <h4 className="font-headline-sm text-[16px] text-on-surface font-semibold mt-0.5">Got 3 days to unwind?</h4>
-              <p className="font-body-sm text-[13px] text-on-surface-variant mt-0.5">Let AI calibrate hills, forests, and terracotta trails.</p>
+              <h4 className="font-headline-sm text-[16px] text-on-surface font-semibold mt-0.5">{t('explore.got3Days')}</h4>
+              <p className="font-body-sm text-[13px] text-on-surface-variant mt-0.5">{t('explore.letAiCalibrate')}</p>
             </div>
             <button 
               id="drawer-build-detoura-btn"
               onClick={handleBuildDetoura}
               className="shrink-0 px-3.5 py-2 rounded-xl bg-secondary text-on-secondary font-label-md text-label-md font-semibold hover:bg-secondary-fixed-variant transition-transform active:scale-95 shadow-sm cursor-pointer"
             >
-              Craft Trip
+              {t('explore.craftTrip')}
             </button>
           </div>
         </section>

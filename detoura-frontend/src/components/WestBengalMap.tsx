@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getDestinationImage } from '../services/imageService';
 import DestinationImage from './DestinationImage';
+import { useTranslation } from '../DetouraContext';
 
 export interface MapDestination {
   destination_id: string;
@@ -69,6 +70,7 @@ export default function WestBengalMap({
   className = '',
   height = '360px'
 }: WestBengalMapProps) {
+  const { t } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, { marker: L.Marker; dest: MapDestination }>>(new Map());
@@ -305,14 +307,14 @@ export default function WestBengalMap({
                 {activePopupDest.district || 'West Bengal'}
               </span>
               <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-label-sm text-[9px] font-bold">
-                Selected
+                {t('map.selected')}
               </span>
             </div>
             <h4 className="font-headline-sm text-[14px] font-semibold text-on-surface truncate leading-tight mt-0.5">
               {activePopupDest.name}
             </h4>
             <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-[11px] mt-1">
-              <span className="truncate">{activePopupDest.category || 'Regional Destination'}</span>
+              <span className="truncate">{activePopupDest.category || t('map.regionalDestination')}</span>
               {activePopupDest.estimated_daily_inr ? (
                 <span className="font-semibold text-secondary shrink-0">
                   ₹{Math.round(activePopupDest.estimated_daily_inr)}/d
@@ -323,7 +325,7 @@ export default function WestBengalMap({
           <button
             onClick={() => setActivePopupDest(null)}
             className="text-on-surface-variant hover:text-on-surface p-0.5 cursor-pointer"
-            aria-label="Close details"
+            aria-label={t('map.closeDetails')}
           >
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
@@ -335,24 +337,24 @@ export default function WestBengalMap({
         <button
           onClick={handleZoomIn}
           className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 cursor-pointer"
-          title="Zoom in"
-          aria-label="Zoom in"
+          title={t('map.zoomIn')}
+          aria-label={t('map.zoomIn')}
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
         </button>
         <button
           onClick={handleZoomOut}
           className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 cursor-pointer"
-          title="Zoom out"
-          aria-label="Zoom out"
+          title={t('map.zoomOut')}
+          aria-label={t('map.zoomOut')}
         >
           <span className="material-symbols-outlined text-[16px]">remove</span>
         </button>
         <button
           onClick={handleRecenter}
           className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-95 cursor-pointer"
-          title="Recenter West Bengal"
-          aria-label="Recenter West Bengal"
+          title={t('map.recenter')}
+          aria-label={t('map.recenter')}
         >
           <span className="material-symbols-outlined text-[16px]">my_location</span>
         </button>

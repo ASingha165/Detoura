@@ -246,15 +246,17 @@ export default function Recommendations() {
         <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-primary mb-4">
           <span className="material-symbols-outlined text-[32px]">travel_explore</span>
         </div>
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-2">No recommendations yet</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface mb-2 font-semibold">
+          {t('recommendations.noRecsYet')}
+        </h2>
         <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mb-6">
-          Tune your Travel DNA affinity sliders to generate bespoke West Bengal detours.
+          {t('recommendations.tuneDnaPrompt')}
         </p>
         <button 
           onClick={() => navigate('/travel-dna')}
           className="px-6 py-3 bg-primary hover:bg-primary-container text-on-primary font-label-lg rounded-xl shadow-sm transition-all cursor-pointer"
         >
-          Build Travel DNA
+          {t('recommendations.buildTravelDnaBtn')}
         </button>
       </div>
     );
@@ -269,11 +271,11 @@ export default function Recommendations() {
             <div className="flex items-center gap-1.5 flex-wrap">
               <div className="inline-flex items-center gap-1.5 px-space-xs py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant">
                 <span className="material-symbols-outlined text-[16px] text-secondary">psychology</span>
-                <span className="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Model 2 • Regional Engine</span>
+                <span className="font-label-sm text-label-sm uppercase tracking-wider font-semibold">{t('recommendations.modelEngineBadge')}</span>
               </div>
               <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
                 <span className="material-symbols-outlined text-[14px] text-primary">calendar_month</span>
-                <span>{travelMonthName} {seasonMode === 'current' ? '(Current Season)' : '(Custom)'}</span>
+                <span>{t('months.' + (activeMonth || 9)) || travelMonthName} {seasonMode === 'current' ? `(${t('recommendations.currentSeasonBadge')})` : `(${t('recommendations.customSeasonBadge')})`}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -311,12 +313,12 @@ export default function Recommendations() {
                   </span>
                   <span>
                     {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma'
-                      ? 'Gemma AI Generative Top Match'
-                      : 'Model 2 Regional Top Match'}
+                      ? t('recommendations.gemmaTopMatch')
+                      : t('recommendations.modelTopMatch')}
                   </span>
                 </div>
                 <span className="text-[12px] font-bold text-secondary-fixed-variant bg-secondary-fixed/50 px-2.5 py-0.5 rounded-full">
-                  {tripDays}-Day Curated Plan
+                  {tripDays}-{t('common.day')} {t('recommendations.curatedPlanBadge')}
                 </span>
               </div>
 
@@ -330,13 +332,13 @@ export default function Recommendations() {
                     <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
                     <span>{activeOrFallbackIntelligence.destination.address || `${activeOrFallbackIntelligence.destination.district}, West Bengal`}</span>
                     <span>•</span>
-                    <span className="font-semibold text-secondary">{activeOrFallbackIntelligence.destination.category}</span>
+                    <span className="font-semibold text-secondary">{activeOrFallbackIntelligence.destination.category || t('common.spot')}</span>
                     {userLocation && activeOrFallbackIntelligence.destination.latitude && activeOrFallbackIntelligence.destination.longitude ? (
                       <>
                         <span>•</span>
                         <span className="inline-flex items-center gap-1 text-primary font-semibold">
                           <span className="material-symbols-outlined text-[14px]">near_me</span>
-                          {formatDistance(activeOrFallbackIntelligence.user_distance?.distance_km ?? calculateHaversineDistance(userLocation.latitude, userLocation.longitude, activeOrFallbackIntelligence.destination.latitude, activeOrFallbackIntelligence.destination.longitude))} from your location
+                          {formatDistance(activeOrFallbackIntelligence.user_distance?.distance_km ?? calculateHaversineDistance(userLocation.latitude, userLocation.longitude, activeOrFallbackIntelligence.destination.latitude, activeOrFallbackIntelligence.destination.longitude))} {t('destinationDetail.fromYourLocation')}
                         </span>
                       </>
                     ) : (
@@ -351,7 +353,7 @@ export default function Recommendations() {
                           className="inline-flex items-center gap-1 text-primary hover:underline text-[12px] font-medium cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[13px]">my_location</span>
-                          <span>Enable location for distance</span>
+                          <span>{t('recommendations.enableLocationDistance')}</span>
                         </button>
                       </>
                     )}
@@ -359,7 +361,7 @@ export default function Recommendations() {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="px-3 py-1 rounded-xl bg-secondary text-on-secondary font-bold text-label-lg shadow-sm">
-                    {Math.min(Math.max(Math.round((activeOrFallbackIntelligence.destination_intelligence.match_score > 1.0 ? activeOrFallbackIntelligence.destination_intelligence.match_score / 2.5 : activeOrFallbackIntelligence.destination_intelligence.match_score) * 100), 50), 99)}% Match
+                    {Math.min(Math.max(Math.round((activeOrFallbackIntelligence.destination_intelligence.match_score > 1.0 ? activeOrFallbackIntelligence.destination_intelligence.match_score / 2.5 : activeOrFallbackIntelligence.destination_intelligence.match_score) * 100), 50), 99)}% {t('common.match')}
                   </div>
                 </div>
               </div>
@@ -372,8 +374,8 @@ export default function Recommendations() {
                       {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma' ? 'auto_awesome' : 'insights'}
                     </span>
                     {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma'
-                      ? 'Gemma Generative Synthesis & Match Reasoning:'
-                      : 'Model 2 Calibrated Match Reasoning:'}
+                      ? t('recommendations.gemmaReasoningTitle')
+                      : t('recommendations.modelReasoningTitle')}
                   </span>
                   {activeOrFallbackIntelligence.explanation}
                 </div>
@@ -382,19 +384,19 @@ export default function Recommendations() {
               {/* Key Metrics Chips */}
               <div className="grid grid-cols-3 gap-2 mt-3 text-center">
                 <div className="p-2 rounded-xl bg-surface-container-high/70">
-                  <span className="text-[10px] uppercase font-bold text-on-surface-variant block">Season SSI</span>
+                  <span className="text-[10px] uppercase font-bold text-on-surface-variant block">{t('recommendations.ssiBadge')}</span>
                   <span className="font-label-md font-bold text-primary">
                     {activeOrFallbackIntelligence.destination_intelligence.ssi.toFixed(2)}
                   </span>
                 </div>
                 <div className="p-2 rounded-xl bg-surface-container-high/70">
-                  <span className="text-[10px] uppercase font-bold text-on-surface-variant block">Tranquility</span>
+                  <span className="text-[10px] uppercase font-bold text-on-surface-variant block">{t('destinationDetail.tranquility')}</span>
                   <span className="font-label-md font-bold text-secondary">
                     {Math.round(activeOrFallbackIntelligence.destination_intelligence.underrated_score * 100)}%
                   </span>
                 </div>
                 <div className="p-2 rounded-xl bg-surface-container-high/70">
-                  <span className="text-[10px] uppercase font-bold text-on-surface-variant block">Crowd Index</span>
+                  <span className="text-[10px] uppercase font-bold text-on-surface-variant block">{t('destinationDetail.crowdIndex')}</span>
                   <span className="font-label-md font-bold text-on-surface">
                     {activeOrFallbackIntelligence.destination_intelligence.live_cpi.toFixed(2)}
                   </span>
@@ -409,7 +411,7 @@ export default function Recommendations() {
                   className="flex-1 py-2.5 px-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-                  <span>View {tripDays}-Day Curated Plan</span>
+                  <span>{t('recommendations.viewCuratedPlan').replace('{tripDays}', String(tripDays))}</span>
                 </button>
                 <button
                   id="locate-gemma-pin-btn"
@@ -423,7 +425,7 @@ export default function Recommendations() {
                   className="py-2.5 px-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold flex items-center gap-1 transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px] text-primary">pin_drop</span>
-                  <span>Locate Pin</span>
+                  <span>{t('recommendations.locatePin')}</span>
                 </button>
               </div>
             </div>
@@ -476,9 +478,9 @@ export default function Recommendations() {
         {filteredRecommendations.length === 0 && (
           <div className="p-8 mx-margin-mobile my-4 bg-surface-container-low rounded-2xl text-center flex flex-col items-center">
             <span className="material-symbols-outlined text-[32px] text-on-surface-variant mb-2">filter_alt_off</span>
-            <p className="font-body-md text-body-md text-on-surface font-medium">No destinations match this budget criteria</p>
+            <p className="font-body-md text-body-md text-on-surface font-medium">{t('recommendations.noBudgetMatchTitle')}</p>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-4">
-              Try selecting "All Tiers" or increasing the daily budget ceiling.
+              {t('recommendations.noBudgetMatchSubtitle')}
             </p>
             <button
               onClick={() => {
@@ -487,7 +489,7 @@ export default function Recommendations() {
               }}
               className="px-4 py-2 rounded-xl bg-secondary text-on-secondary font-label-md text-label-md font-semibold cursor-pointer"
             >
-              Reset Budget Filter
+              {t('recommendations.resetBudgetFilter')}
             </button>
           </div>
         )}
@@ -500,10 +502,10 @@ export default function Recommendations() {
                 <span className="material-symbols-outlined text-primary text-[20px] shrink-0">near_me</span>
                 <span className="text-on-surface-variant truncate">
                   {locationStatus === 'denied'
-                    ? 'Location permission denied. Enable in browser for live distance & directions.'
+                    ? t('recommendations.locationDeniedMsg')
                     : locationStatus === 'loading'
-                    ? 'Detecting your live position...'
-                    : 'Enable live location to see exact distance and driving directions.'}
+                    ? t('recommendations.locationDetectingMsg')
+                    : t('recommendations.locationPromptMsg')}
                 </span>
               </div>
               {locationStatus === 'prompt' && (
@@ -512,7 +514,7 @@ export default function Recommendations() {
                   onClick={() => requestUserLocation()}
                   className="px-3 py-1 bg-primary text-on-primary rounded-lg font-label-sm font-semibold shrink-0 cursor-pointer hover:bg-primary-container shadow-xs"
                 >
-                  Enable Location
+                  {t('recommendations.enableLocationBtn')}
                 </button>
               )}
             </div>
@@ -552,7 +554,7 @@ export default function Recommendations() {
                   
                   <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
                     <span className="bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-wider px-2.5 py-0.5 rounded shadow-sm font-semibold">
-                      Rank #{index + 1}
+                      {t('recommendations.rankPrefix')} #{index + 1}
                     </span>
                     {rec.district && (
                       <span className="bg-black/50 backdrop-blur-xs text-white font-label-sm text-label-sm px-2 py-0.5 rounded">
@@ -562,7 +564,7 @@ export default function Recommendations() {
                     {userLocation && rec.latitude && rec.longitude && (
                       <span className="bg-surface/95 backdrop-blur-xs text-on-surface font-label-sm text-label-sm px-2 py-0.5 rounded shadow-xs font-semibold inline-flex items-center gap-0.5">
                         <span className="text-[12px]">📍</span>
-                        <span>{formatDistance(rec.distance_km ?? calculateHaversineDistance(userLocation.latitude, userLocation.longitude, rec.latitude, rec.longitude))} away</span>
+                        <span>{formatDistance(rec.distance_km ?? calculateHaversineDistance(userLocation.latitude, userLocation.longitude, rec.latitude, rec.longitude))} {t('common.kmAway')}</span>
                       </span>
                     )}
                   </div>
@@ -570,22 +572,22 @@ export default function Recommendations() {
                   <div className="absolute top-3 right-3 flex items-center gap-1.5">
                     <div className="bg-surface-container-lowest/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                      <span className="font-label-sm text-label-sm font-bold text-on-surface">{matchPercent}% Match</span>
+                      <span className="font-label-sm text-label-sm font-bold text-on-surface">{matchPercent}% {t('common.match')}</span>
                     </div>
                   </div>
 
                   <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between text-white">
                     <div>
                       <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed font-bold">
-                        {rec.category || 'Spot'}
+                        {rec.category || t('common.spot')}
                       </span>
                       <h3 className="font-headline-md text-headline-md text-white font-bold leading-tight mt-0.5">
                         {rec.name}
                       </h3>
                     </div>
                     <div className="text-right">
-                      <span className="font-label-sm text-[10px] text-white/70 block uppercase">Est. Daily</span>
-                      <span className="font-headline-sm text-headline-sm text-white font-bold">₹{dailyCost}</span>
+                      <span className="font-label-sm text-[10px] text-white/70 block uppercase">{t('recommendations.estDaily')}</span>
+                      <span className="font-headline-sm text-headline-sm text-white font-bold">₹{dailyCost}{t('common.perDay')}</span>
                     </div>
                   </div>
                 </div>
@@ -603,18 +605,18 @@ export default function Recommendations() {
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-secondary text-[20px]">diamond</span>
                       <div className="flex flex-col">
-                        <span className="font-label-sm text-[10px] text-on-surface-variant uppercase">Tranquility Score</span>
+                        <span className="font-label-sm text-[10px] text-on-surface-variant uppercase">{t('recommendations.tranquilityScore')}</span>
                         <span className="font-label-md text-label-md font-bold text-secondary">
-                          {Math.round((rec.underrated_score || 0.6) * 100)}% Offbeat
+                          {Math.round((rec.underrated_score || 0.6) * 100)}% {t('recommendations.offbeatLabel')}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-primary text-[20px]">group</span>
                       <div className="flex flex-col">
-                        <span className="font-label-sm text-[10px] text-on-surface-variant uppercase">Crowd Pressure</span>
+                        <span className="font-label-sm text-[10px] text-on-surface-variant uppercase">{t('recommendations.crowdPressureLabel')}</span>
                         <span className="font-label-md text-label-md font-bold text-primary">
-                          {Math.round((rec.cpi_used || 0.3) * 100)}% Low Density
+                          {Math.round((rec.cpi_used || 0.3) * 100)}% {t('recommendations.lowDensity')}
                         </span>
                       </div>
                     </div>
@@ -637,10 +639,10 @@ export default function Recommendations() {
                           }
                         }}
                         className="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
-                        title="View Pin on Map"
+                        title={t('recommendations.viewPinOnMap')}
                       >
                         <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
-                        <span>View Pin</span>
+                        <span>{t('explore.viewPin')}</span>
                       </button>
 
                       <button

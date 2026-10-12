@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useTranslation } from '../DetouraContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +11,7 @@ export default function Login() {
   const [formError, setFormError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { user, login, loginWithGoogle, loading, error, clearError } = useAuth();
+  const { t } = useTranslation();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,11 +30,11 @@ export default function Login() {
     clearError();
 
     if (!email.trim()) {
-      setFormError('Please enter your email address.');
+      setFormError(t('auth.errorEnterEmail'));
       return;
     }
     if (!password) {
-      setFormError('Please enter your password.');
+      setFormError(t('auth.errorEnterPassword'));
       return;
     }
 
@@ -66,11 +69,14 @@ export default function Login() {
             <span className="w-6 h-6 rounded-full bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center font-semibold">
               <span className="material-symbols-outlined text-[14px]">lock</span>
             </span>
-            <span className="font-label-md text-label-md text-on-surface uppercase tracking-wider font-semibold">Authentication</span>
+            <span className="font-label-md text-label-md text-on-surface uppercase tracking-wider font-semibold">{t('auth.authTitle')}</span>
           </div>
-          <div className="flex items-center gap-1.5 px-space-xs py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
-            <span>Firebase Auth</span>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <div className="flex items-center gap-1.5 px-space-xs py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+              <span>Firebase Auth</span>
+            </div>
           </div>
         </div>
 
@@ -81,10 +87,10 @@ export default function Login() {
 
         <div className="space-y-1">
           <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface tracking-tight">
-            Welcome back, Traveler.
+            {t('auth.welcomeBack')}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant">
-            Sign in to access your personalized Travel DNA and regional detours.
+            {t('auth.welcomeSubtitle')}
           </p>
         </div>
       </section>
@@ -108,12 +114,12 @@ export default function Login() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading || googleLoading}
-            className="w-full py-3 px-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/60 text-on-surface font-label-lg text-label-lg font-semibold flex items-center justify-center gap-3 shadow-xs hover:shadow-sm active:scale-[0.99] transition-all"
+            className="w-full py-3 px-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/60 text-on-surface font-label-lg text-label-lg font-semibold flex items-center justify-center gap-3 shadow-xs hover:shadow-sm active:scale-[0.99] transition-all cursor-pointer"
           >
             {googleLoading ? (
               <>
                 <div className="w-5 h-5 rounded-full border-2 border-secondary border-t-transparent animate-spin"></div>
-                <span>Connecting with Google...</span>
+                <span>{t('auth.connectingWithGoogle')}</span>
               </>
             ) : (
               <>
@@ -135,7 +141,7 @@ export default function Login() {
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>Continue with Google</span>
+                <span>{t('auth.continueWithGoogle')}</span>
               </>
             )}
           </button>
@@ -144,7 +150,7 @@ export default function Login() {
           <div className="relative flex items-center justify-center">
             <div className="border-t border-outline-variant/40 w-full"></div>
             <span className="bg-surface-container-low px-3 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-medium">
-              or with email
+              {t('auth.orWithEmail')}
             </span>
           </div>
 
@@ -152,7 +158,7 @@ export default function Login() {
             {/* Email Field */}
             <div className="space-y-1.5">
               <label className="block font-label-md text-label-md text-on-surface font-semibold" htmlFor="login-email">
-                Email Address
+                {t('auth.emailLabel')}
               </label>
               <div className="relative flex items-center">
                 <span className="material-symbols-outlined absolute left-3 text-secondary text-[20px]">mail</span>
@@ -162,7 +168,7 @@ export default function Login() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="traveler@detoura.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-surface-container-lowest border border-outline/20 text-on-surface placeholder:text-on-surface-variant/50 font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   disabled={loading}
                 />
@@ -172,7 +178,7 @@ export default function Login() {
             {/* Password Field */}
             <div className="space-y-1.5">
               <label className="block font-label-md text-label-md text-on-surface font-semibold" htmlFor="login-password">
-                Password
+                {t('auth.passwordLabel')}
               </label>
               <div className="relative flex items-center">
                 <span className="material-symbols-outlined absolute left-3 text-secondary text-[20px]">lock</span>
@@ -182,15 +188,15 @@ export default function Login() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   className="w-full pl-10 pr-10 py-3 rounded-xl bg-surface-container-lowest border border-outline/20 text-on-surface placeholder:text-on-surface-variant/50 font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-on-surface-variant hover:text-on-surface transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+                  aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                 >
                   <span className="material-symbols-outlined text-[20px]">
                     {showPassword ? 'visibility_off' : 'visibility'}
@@ -204,16 +210,16 @@ export default function Login() {
               id="login-submit-btn"
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-space-md rounded-xl bg-primary hover:bg-primary-container active:scale-[0.99] text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md transition-all mt-2"
+              className="w-full py-3.5 px-space-md rounded-xl bg-primary hover:bg-primary-container active:scale-[0.99] text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 shadow-md transition-all mt-2 cursor-pointer"
             >
               {loading ? (
                 <>
                   <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                  <span>Signing In...</span>
+                  <span>{t('auth.signingIn')}</span>
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>{t('auth.signInButton')}</span>
                   <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                 </>
               )}
@@ -223,9 +229,9 @@ export default function Login() {
           {/* Switch to Sign Up */}
           <div className="pt-2 text-center border-t border-surface-container-high flex flex-col items-center gap-2">
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              New to DETOURA?{' '}
+              {t('auth.newToDetoura')}{' '}
               <Link to="/signup" state={location.state} id="switch-to-signup-btn" className="text-primary font-semibold hover:underline">
-                Create an account
+                {t('auth.createAccountLink')}
               </Link>
             </p>
 
@@ -233,9 +239,9 @@ export default function Login() {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="text-secondary font-label-sm text-label-sm hover:underline flex items-center gap-1 mt-1"
+              className="text-secondary font-label-sm text-label-sm hover:underline flex items-center gap-1 mt-1 cursor-pointer"
             >
-              <span>Explore as Guest without signing in</span>
+              <span>{t('auth.exploreAsGuest')}</span>
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
             </button>
           </div>

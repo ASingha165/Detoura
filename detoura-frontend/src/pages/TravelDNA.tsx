@@ -364,14 +364,14 @@ export default function TravelDNA() {
                     id="entry-login-btn"
                     className="px-2.5 py-1 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-sm text-label-sm font-semibold transition-colors"
                   >
-                    Log In
+                    {t('common.signIn')}
                   </Link>
                   <Link
                     to="/signup"
                     id="entry-signup-btn"
                     className="px-2.5 py-1 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold transition-colors shadow-xs"
                   >
-                    Sign Up
+                    {t('common.signUp')}
                   </Link>
                 </div>
               )}
@@ -384,11 +384,11 @@ export default function TravelDNA() {
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="material-symbols-outlined text-secondary text-[16px]">travel_explore</span>
                 <span className="font-body-sm text-[12px] text-on-surface-variant truncate">
-                  Sign in to save detours and custom passport
+                  {t('travelDna.guestNotice')}
                 </span>
               </div>
               <Link to="/login" className="text-primary font-label-sm text-[12px] font-semibold hover:underline shrink-0">
-                Join / Sign In
+                {t('travelDna.guestAction')}
               </Link>
             </div>
           )}
@@ -399,7 +399,7 @@ export default function TravelDNA() {
               <div className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
                 <div className="flex-1 break-words">
-                  <span className="font-semibold block mb-0.5">Recommendation Service Notice</span>
+                  <span className="font-semibold block mb-0.5">{t('travelDna.errorNoticeTitle')}</span>
                   <span>{apiError}</span>
                 </div>
               </div>
@@ -409,13 +409,13 @@ export default function TravelDNA() {
                   onClick={handleBuildDetoura}
                   className="px-3 py-1.5 bg-error text-on-error rounded-lg font-label-sm text-label-sm font-semibold hover:opacity-90 transition-opacity"
                 >
-                  Retry
+                  {t('common.retry')}
                 </button>
                 <Link
                   to="/explore"
                   className="px-3 py-1.5 bg-surface-container text-on-surface rounded-lg font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-colors"
                 >
-                  Explore Offline Catalog
+                  {t('travelDna.exploreOffline')}
                 </Link>
               </div>
             </div>
@@ -432,15 +432,15 @@ export default function TravelDNA() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 1: AFFINITY RESONANCE (Core 4D Model 2 Vectors - UNCHANGED)       */}
+        {/* SECTION 1: AFFINITY RESONANCE (Core 4D Model 2 Vectors)                   */}
         {/* ========================================================================= */}
         <section className="px-margin-mobile py-space-sm">
           <div className="flex items-center justify-between mb-space-sm">
             <div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Affinity Resonance</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Slide to weight your destination discovery engine.</p>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('travelDna.affinityTitle')}</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.affinitySubtitle')}</p>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">Live Weights</span>
+            <span className="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">{t('travelDna.liveWeights')}</span>
           </div>
           <div className="space-y-space-sm">
             {/* Card: Nature */}
@@ -451,8 +451,8 @@ export default function TravelDNA() {
                     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>eco</span>
                   </div>
                   <div>
-                    <span className="font-label-lg text-label-lg text-on-surface block">Nature &amp; Wildlands</span>
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">Misty hills, wildlife trails, tea gardens</span>
+                    <span className="font-label-lg text-label-lg text-on-surface block">{t('travelDna.nature')}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.natureDesc')}</span>
                   </div>
                 </div>
                 <span className="font-label-lg text-label-lg text-secondary font-bold" id="val-nature">{nature}%</span>
@@ -478,8 +478,8 @@ export default function TravelDNA() {
                     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>water</span>
                   </div>
                   <div>
-                    <span className="font-label-lg text-label-lg text-on-surface block">Quiet Serenity</span>
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">Calm coasts, heritage tea retreats, quiet ghats</span>
+                    <span className="font-label-lg text-label-lg text-on-surface block">{t('travelDna.serenity')}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.serenityDesc')}</span>
                   </div>
                 </div>
                 <span className="font-label-lg text-label-lg text-secondary font-bold" id="val-relax">{relax}%</span>
@@ -505,8 +505,8 @@ export default function TravelDNA() {
                     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>museum</span>
                   </div>
                   <div>
-                    <span className="font-label-lg text-label-lg text-on-surface block">Culture &amp; Living Heritage</span>
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">Terracotta temples, handlooms, baul music</span>
+                    <span className="font-label-lg text-label-lg text-on-surface block">{t('travelDna.culture')}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.cultureDesc')}</span>
                   </div>
                 </div>
                 <span className="font-label-lg text-label-lg text-primary font-bold" id="val-culture">{culture}%</span>
@@ -532,8 +532,8 @@ export default function TravelDNA() {
                     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>skillet</span>
                   </div>
                   <div>
-                    <span className="font-label-lg text-label-lg text-on-surface block">Gastronomy &amp; Local Food</span>
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">Authentic regional flavors, sweets, kosha</span>
+                    <span className="font-label-lg text-label-lg text-on-surface block">{t('travelDna.adventure')}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.adventureDesc')}</span>
                   </div>
                 </div>
                 <span className="font-label-lg text-label-lg text-tertiary font-bold" id="val-food">{food}%</span>
@@ -559,12 +559,12 @@ export default function TravelDNA() {
         <section className="px-margin-mobile py-space-sm">
           <div className="flex items-center justify-between mb-space-xs">
             <div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Landscape &amp; Place Preferences</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Select geographical landscapes to tailor regional discovery.</p>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('travelDna.placeTypesTitle')}</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.placeTypesSubtitle')}</p>
             </div>
             {selectedPlaceTypes.length > 0 && (
               <span className="px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
-                {selectedPlaceTypes.length} Selected
+                {selectedPlaceTypes.length} {t('travelDna.selectedCount')}
               </span>
             )}
           </div>
@@ -592,7 +592,7 @@ export default function TravelDNA() {
                     >
                       {pt.icon}
                     </span>
-                    <span className="font-label-sm text-label-sm truncate">{pt.label}</span>
+                    <span className="font-label-sm text-label-sm truncate">{t('placeTypes.' + pt.id, pt.label)}</span>
                   </button>
                 );
               })}
@@ -606,11 +606,11 @@ export default function TravelDNA() {
         <section className="px-margin-mobile py-space-sm">
           <div className="flex items-center justify-between mb-space-xs">
             <div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">When Do You Want To Travel?</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Feeds destination monthly temperature &amp; rainfall into Model 2 SSI.</p>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('travelDna.whenToTravel')}</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.whenSubtitle')}</p>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-semibold">
-              {activeTravelMonthName}
+              {t('months.' + activeTravelMonth) || activeTravelMonthName}
             </span>
           </div>
 
@@ -628,7 +628,7 @@ export default function TravelDNA() {
                 }`}
               >
                 <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-                <span>Current Season</span>
+                <span>{t('travelDna.currentSeason')}</span>
               </button>
               <button
                 id="season-mode-custom"
@@ -641,7 +641,7 @@ export default function TravelDNA() {
                 }`}
               >
                 <span className="material-symbols-outlined text-[18px]">tune</span>
-                <span>Custom Month</span>
+                <span>{t('travelDna.customSeason')}</span>
               </button>
             </div>
 
@@ -652,15 +652,15 @@ export default function TravelDNA() {
                   <span className="material-symbols-outlined text-[20px] text-secondary">wb_sunny</span>
                   <div>
                     <span className="font-label-md text-label-md text-on-surface font-semibold block">
-                      Runtime System Month: {currentCalendarMonthName} {currentCalendarYear}
+                      {t('travelDna.runtimeSystemMonth')}: {t('months.' + currentCalendarMonthNumber) || currentCalendarMonthName} {currentCalendarYear}
                     </span>
                     <span className="font-body-sm text-[12px] text-on-surface-variant">
-                      Automatically calculated from your current device calendar. No hardcoded values.
+                      {t('travelDna.runtimeMonthDesc')}
                     </span>
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold shrink-0">
-                  Month {currentCalendarMonthNumber}
+                  {t('travelDna.monthNum')} {currentCalendarMonthNumber}
                 </span>
               </div>
             )}
@@ -669,12 +669,13 @@ export default function TravelDNA() {
             {seasonMode === 'custom' && (
               <div className="space-y-2 pt-1 animate-fadeIn">
                 <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm text-on-surface font-semibold">Select Travel Month:</span>
-                  <span className="font-label-sm text-label-sm text-primary font-bold">{activeTravelMonthName}</span>
+                  <span className="font-label-sm text-label-sm text-on-surface font-semibold">{t('travelDna.selectMonth')}</span>
+                  <span className="font-label-sm text-label-sm text-primary font-bold">{t('months.' + activeTravelMonth) || activeTravelMonthName}</span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
                   {MONTHS.map((m) => {
                     const isMonthActive = customMonth === m.num;
+                    const mName = t('months.' + m.num) || m.name;
                     return (
                       <button
                         key={m.num}
@@ -687,7 +688,7 @@ export default function TravelDNA() {
                             : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
                         }`}
                       >
-                        {m.name.slice(0, 3)}
+                        {mName.slice(0, 3)}
                       </button>
                     );
                   })}
@@ -703,19 +704,19 @@ export default function TravelDNA() {
         <section className="px-margin-mobile py-space-sm">
           <div className="flex items-center justify-between mb-space-xs">
             <div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Budget Preference</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Maximum daily estimate constraint for accommodation and food.</p>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('travelDna.budgetTitle')}</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.budgetSubtitle')}</p>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold">
-              ₹{selectedBudgetMax.toLocaleString()}/day
+              ₹{selectedBudgetMax.toLocaleString()}{t('common.perDay')}
             </span>
           </div>
 
           <div className="p-space-md rounded-xl bg-surface-container-low shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-on-surface-variant">Daily Ceiling</span>
+              <span className="font-label-sm text-label-sm text-on-surface-variant">{t('travelDna.dailyCeiling')}</span>
               <span className="font-label-md text-label-md text-primary font-bold">
-                Up to ₹{selectedBudgetMax.toLocaleString()}
+                {t('travelDna.upTo')} ₹{selectedBudgetMax.toLocaleString()}
               </span>
             </div>
             <input
@@ -742,8 +743,8 @@ export default function TravelDNA() {
                 }`}
               >
                 <span id="budget-tier-1" className="block pointer-events-none">
-                  <div className="font-semibold text-[13px]">Daily</div>
-                  <div className="text-[10px] opacity-80 mt-0.5">Tier 1 (₹1,200)</div>
+                  <div className="font-semibold text-[13px]">{t('travelDna.tier1Label')}</div>
+                  <div className="text-[10px] opacity-80 mt-0.5">{t('travelDna.tier1Desc')}</div>
                 </span>
               </button>
 
@@ -759,8 +760,8 @@ export default function TravelDNA() {
                 }`}
               >
                 <span id="budget-tier-2" className="block pointer-events-none">
-                  <div className="font-semibold text-[13px]">Mid-range</div>
-                  <div className="text-[10px] opacity-80 mt-0.5">Tier 2 (₹2,000)</div>
+                  <div className="font-semibold text-[13px]">{t('travelDna.tier2Label')}</div>
+                  <div className="text-[10px] opacity-80 mt-0.5">{t('travelDna.tier2Desc')}</div>
                 </span>
               </button>
 
@@ -776,8 +777,8 @@ export default function TravelDNA() {
                 }`}
               >
                 <span id="budget-tier-3" className="block pointer-events-none">
-                  <div className="font-semibold text-[13px]">Premium</div>
-                  <div className="text-[10px] opacity-80 mt-0.5">Tier 3 (₹3,500+)</div>
+                  <div className="font-semibold text-[13px]">{t('travelDna.tier3Label')}</div>
+                  <div className="text-[10px] opacity-80 mt-0.5">{t('travelDna.tier3Desc')}</div>
                 </span>
               </button>
             </div>
@@ -790,11 +791,11 @@ export default function TravelDNA() {
         <section className="px-margin-mobile py-space-sm">
           <div className="flex items-center justify-between mb-space-xs">
             <div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Trip Duration &amp; Gemma AI Plan</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Local Gemma model synthesizes a custom multi-day morning/afternoon/evening itinerary.</p>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('travelDna.durationPlanTitle')}</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('travelDna.durationPlanSubtitle')}</p>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold">
-              {tripDays} {tripDays === 1 ? 'Day' : 'Days'}
+              {tripDays} {tripDays === 1 ? t('common.day') : t('common.days')}
             </span>
           </div>
 
@@ -812,16 +813,16 @@ export default function TravelDNA() {
                       : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
                   }`}
                 >
-                  <span className="text-base font-bold">{d} Days</span>
+                  <span className="text-base font-bold">{d} {t('common.days')}</span>
                   <span className={`text-[10px] ${tripDays === d ? 'text-on-primary/85' : 'text-on-surface-variant'}`}>
-                    {d === 2 ? 'Weekend' : d === 3 ? 'Classic' : d === 4 ? 'Extended' : 'Complete'}
+                    {d === 2 ? t('travelDna.durationWeekend') : d === 3 ? t('travelDna.durationClassic') : d === 4 ? t('travelDna.durationExtended') : t('travelDna.durationComplete')}
                   </span>
                 </button>
               ))}
             </div>
             <div className="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container/70 border border-outline-variant/30 text-[12px] text-on-surface-variant">
               <span className="material-symbols-outlined text-[18px] text-primary shrink-0">psychology</span>
-              <span>Gemma 2B LLM runs locally on CPU/CUDA to generate your {tripDays}-day time-slotted itinerary &amp; contextual activity rankings.</span>
+              <span>{t('travelDna.gemmaLlmNotice').replace('{tripDays}', String(tripDays))}</span>
             </div>
           </div>
         </section>
@@ -846,7 +847,7 @@ export default function TravelDNA() {
             <div className="flex items-center justify-center gap-1.5 text-center">
               <span className="material-symbols-outlined text-secondary text-[14px]">verified</span>
               <p className="font-label-sm text-label-sm text-on-surface-variant">
-                Model 2 Multi-Criteria: Cosine Similarity + Real {activeTravelMonthName} SSI + Live CPI + Underrated Score + Gemma AI
+                {t('travelDna.multiCriteriaFooter').replace('{activeTravelMonthName}', t('months.' + activeTravelMonth) || activeTravelMonthName)}
               </p>
             </div>
           </div>
