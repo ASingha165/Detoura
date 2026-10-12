@@ -772,6 +772,7 @@ def get_recommendations(request: RecommendRequest):
     try:
         clean_tier = normalize_budget_tier(request.budget_tier)
         cache_key = json.dumps({
+            "model_version": "Model-2-v2",
             "prefs": request.user_prefs.model_dump(),
             "weights": request.weights.model_dump(),
             "month": request.month,
@@ -894,7 +895,7 @@ def get_recommendations(request: RecommendRequest):
                         "place_types_requested": request.place_types or [],
                         "budget_max": request.budget_max,
                         "budget_tier": clean_tier,
-                        "model_version": "Model-2-Validated"
+                        "model_version": "Model-2-v2"
                     }
                 )
             )

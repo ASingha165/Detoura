@@ -82,8 +82,45 @@ function sanitizeForFirestore(val: any): any {
 
 export function DetouraProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const [recommendations, setRecommendations] = useState<RecommendResponse[]>([]);
-  const [activeIntelligence, setActiveIntelligence] = useState<Model3Recommendation | null>(null);
+  const [recommendations, setRecommendationsState] = useState<RecommendResponse[]>(() => {
+    try {
+      const stored = sessionStorage.getItem('detoura_last_recommendations');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [activeIntelligence, setActiveIntelligenceState] = useState<Model3Recommendation | null>(() => {
+    try {
+      const stored = sessionStorage.getItem('detoura_last_active_intelligence');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const setRecommendations = (recs: RecommendResponse[]) => {
+    setRecommendationsState(recs);
+    try {
+      if (Array.isArray(recs) && recs.length > 0) {
+        sessionStorage.setItem('detoura_last_recommendations', JSON.stringify(recs));
+      } else {
+        sessionStorage.removeItem('detoura_last_recommendations');
+      }
+    } catch {}
+  };
+
+  const setActiveIntelligence = (intel: Model3Recommendation | null) => {
+    setActiveIntelligenceState(intel);
+    try {
+      if (intel) {
+        sessionStorage.setItem('detoura_last_active_intelligence', JSON.stringify(intel));
+      } else {
+        sessionStorage.removeItem('detoura_last_active_intelligence');
+      }
+    } catch {}
+  };
   const [savedTrips, setSavedTrips] = useState<RecommendResponse[]>([]);
   const [isLoadingTrips, setIsLoadingTrips] = useState<boolean>(false);
   const [tripDays, setTripDays] = useState<number>(3);

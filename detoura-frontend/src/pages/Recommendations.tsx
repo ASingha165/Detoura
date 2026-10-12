@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDetoura } from '../DetouraContext';
 import type { RecommendResponse } from '../api';
-import { formatDistance, calculateHaversineDistance, getIntelligenceRecommendation } from '../api';
+import { formatDistance, calculateHaversineDistance, getIntelligenceRecommendation, synthesizeOfflineIntelligence } from '../api';
 import WestBengalMap from '../components/WestBengalMap';
 import type { MapDestination } from '../components/WestBengalMap';
 import { getDestinationImage } from '../services/imageService';
@@ -73,84 +73,6 @@ export default function Recommendations() {
     }
   }, [selectedBudgetTier]);
 
-  // Synchronize top match intelligence narrative with selected language
-  useEffect(() => {
-    const destId = activeIntelligence?.destination?.id || recommendations[0]?.destination_id;
-    if (!destId) return;
-
-    const currentExplanation = activeIntelligence?.explanation || '';
-    const hasBengali = /[\u0980-\u09FF]/.test(currentExplanation);
-    const hasHindi = /[\u0900-\u097F]/.test(currentExplanation);
-
-    const needsSync =
-      (language === 'bn' && !hasBengali) ||
-      (language === 'hi' && !hasHindi) ||
-      (language === 'en' && (hasBengali || hasHindi));
-
-    const getLocalizedFallbackDesc = (recName: string, district?: string) => {
-      if (language === 'bn') {
-        return `DETOURA আপনার ট্রাভেল ডিএনএ এবং অফবিট পছন্দের ওপর ভিত্তি করে ${recName} (${district || 'পশ্চিমবঙ্গ'}) নির্বাচন করেছে। মনোরম প্রাকৃতিক পরিবেশ এবং আঞ্চলিক ঐতিহ্য উপভোগ করুন।`;
-      }
-      if (language === 'hi') {
-        return `DETOURA ने आपके यात्रा डीएनए और प्राथमिकताओं के आधार पर ${recName} (${district || 'पश्चिम बंगाल'}) का चयन किया है। शांत प्राकृतिक सुंदरता और स्थानीय संस्कृति का अनुभव करें।`;
-      }
-      return `DETOURA matched ${recName} (${district || 'West Bengal'}) with your travel DNA. Enjoy peaceful scenery, local heritage, and an authentic regional detour.`;
-    };
-
-    const getLocalizedFallbackHighlights = (district?: string, category?: string, tier?: number) => {
-      if (language === 'bn') {
-        return [
-          district ? `জেলা: ${district}` : 'মনোরম বাংলা',
-          category ? `ধরণ: ${category}` : 'অফবিট রুট',
-          tier === 1 ? 'বাজেট বান্ধব' : tier === 3 ? 'প্রিমিয়াম ঐতিহ্য' : 'পরিমিত স্বাচ্ছন্দ্য'
-        ];
-      }
-      if (language === 'hi') {
-        return [
-          district ? `ज़िला: ${district}` : 'सुंदर बंगाल',
-          category ? `श्रेणी: ${category}` : 'ऑफबीट मार्ग',
-          tier === 1 ? 'बजट अनुकूल' : tier === 3 ? 'प्रीमियम हेरिटेज' : 'मध्यम आराम'
-        ];
-      }
-      return [
-        district ? `District: ${district}` : 'Scenic Bengal',
-        category ? `Vibe: ${category}` : 'Offbeat Route',
-        tier === 1 ? 'Budget Friendly' : tier === 3 ? 'Premium Heritage' : 'Moderate Comfort'
-      ];
-    };
-
-    if (needsSync) {
-      getIntelligenceRecommendation({
-        destination_id: destId,
-        trip_days: tripDays,
-        language: language,
-        user_lat: userLocation?.latitude,
-        user_lon: userLocation?.longitude,
-      })
-        .then((payload) => {
-          setActiveIntelligence(payload);
-          setRecommendations(
-            recommendations.map((r) =>
-              r.destination_id === payload.destination.id
-                ? {
-                    ...r,
-                    description: payload.explanation || r.description,
-                    activities: payload.activities || r.activities,
-                    itinerary: payload.itinerary || r.itinerary,
-                    model3_payload: payload,
-                  }
-                : {
-                    ...r,
-                    description: getLocalizedFallbackDesc(r.name, r.district),
-                    highlights: getLocalizedFallbackHighlights(r.district, r.category, r.budget_tier),
-                  }
-            )
-          );
-        })
-        .catch((err) => console.warn('Language sync notice:', err));
-    }
-  }, [language, activeIntelligence?.destination?.id, tripDays, userLocation?.latitude, userLocation?.longitude]);
-
   // Filter recommendations dynamically against real dataset metrics
   // Preserves Model 2 ranking and detoura_score untouched!
   const filteredRecommendations = useMemo(() => {
@@ -173,6 +95,106 @@ export default function Recommendations() {
       return true;
     });
   }, [recommendations, selectedBudget, maxBudget, selectedTier]);
+
+  // The featured showcase destination is strictly the highest-ranked recommendation
+  const topRecommendation = filteredRecommendations[0] || recommendations[0];
+
+  // Guaranteed active intelligence resolved for the top recommendation
+  const activeOrFallbackIntelligence = useMemo(() => {
+    if (!topRecommendation) return null;
+    if (activeIntelligence && activeIntelligence.destination?.id === topRecommendation.destination_id) {
+      return activeIntelligence;
+    }
+    if (topRecommendation.model3_payload && topRecommendation.model3_payload.destination?.id === topRecommendation.destination_id) {
+      return topRecommendation.model3_payload;
+    }
+    return synthesizeOfflineIntelligence({
+      destination_id: topRecommendation.destination_id,
+      month: activeMonth,
+      trip_days: tripDays,
+      language: language,
+      user_lat: userLocation?.latitude,
+      user_lon: userLocation?.longitude,
+    });
+  }, [topRecommendation, activeIntelligence, activeMonth, tripDays, language, userLocation?.latitude, userLocation?.longitude]);
+
+  // Synchronize top match intelligence narrative when top destination or language changes
+  useEffect(() => {
+    if (!topRecommendation) return;
+
+    const destId = topRecommendation.destination_id;
+    const currentExplanation = activeIntelligence?.explanation || '';
+    const hasBengali = /[\u0980-\u09FF]/.test(currentExplanation);
+    const hasHindi = /[\u0900-\u097F]/.test(currentExplanation);
+
+    const needsSync =
+      activeIntelligence?.destination?.id !== destId ||
+      (language === 'bn' && !hasBengali) ||
+      (language === 'hi' && !hasHindi) ||
+      (language === 'en' && (hasBengali || hasHindi));
+
+    if (!needsSync) return;
+
+    // Adopt immediate payload if already present on top recommendation and matching target language
+    if (topRecommendation.model3_payload && topRecommendation.model3_payload.destination?.id === destId) {
+      const payloadExp = topRecommendation.model3_payload.explanation || '';
+      const pHasBn = /[\u0980-\u09FF]/.test(payloadExp);
+      const pHasHi = /[\u0900-\u097F]/.test(payloadExp);
+      const pMatchesLang =
+        (language === 'bn' && pHasBn) ||
+        (language === 'hi' && pHasHi) ||
+        (language === 'en' && !pHasBn && !pHasHi);
+      if (pMatchesLang) {
+        setActiveIntelligence(topRecommendation.model3_payload);
+        return;
+      }
+    }
+
+    getIntelligenceRecommendation({
+      destination_id: destId,
+      trip_days: tripDays,
+      language: language,
+      user_lat: userLocation?.latitude,
+      user_lon: userLocation?.longitude,
+    })
+      .then((payload) => {
+        setActiveIntelligence(payload);
+        setRecommendations(
+          recommendations.map((r) =>
+            r.destination_id === payload.destination.id
+              ? {
+                  ...r,
+                  description: payload.explanation || r.description,
+                  activities: payload.activities || r.activities,
+                  itinerary: payload.itinerary || r.itinerary,
+                  model3_payload: payload,
+                }
+              : r
+          )
+        );
+      })
+      .catch((err) => {
+        console.warn('Intelligence sync notice, using calibrated Model 2 synthesis:', err);
+        const synth = synthesizeOfflineIntelligence({
+          destination_id: destId,
+          month: activeMonth,
+          trip_days: tripDays,
+          language: language,
+          user_lat: userLocation?.latitude,
+          user_lon: userLocation?.longitude,
+        });
+        if (synth) {
+          setActiveIntelligence(synth);
+        }
+      });
+  }, [
+    topRecommendation?.destination_id,
+    language,
+    tripDays,
+    activeMonth,
+    userLocation?.latitude,
+    userLocation?.longitude
+  ]);
 
   // Safe selection clearing if selected destination is filtered out
   useEffect(() => {
@@ -271,17 +293,27 @@ export default function Recommendations() {
           </div>
         </div>
 
-        {/* Gemma AI Top Match Highlight Showcase */}
-        {activeIntelligence && (
+        {/* Top Match Highlight Showcase (Gemma AI or Calibrated Model 2) */}
+        {activeOrFallbackIntelligence && (
           <section className="px-margin-mobile my-2">
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-container-lowest via-surface-container-low to-surface-container-high border-2 border-primary/30 shadow-md p-4 transition-all">
               <div className="absolute top-0 right-0 w-44 h-44 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
               
               {/* Engine Badge & Duration */}
               <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shadow-xs">
-                  <span className="material-symbols-outlined text-[16px]">psychology</span>
-                  <span>Gemma AI Generative Top Match</span>
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm font-semibold shadow-xs ${
+                  activeOrFallbackIntelligence.generation_metadata?.source === 'gemma'
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-secondary text-on-secondary'
+                }`}>
+                  <span className="material-symbols-outlined text-[16px]">
+                    {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma' ? 'psychology' : 'analytics'}
+                  </span>
+                  <span>
+                    {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma'
+                      ? 'Gemma AI Generative Top Match'
+                      : 'Model 2 Regional Top Match'}
+                  </span>
                 </div>
                 <span className="text-[12px] font-bold text-secondary-fixed-variant bg-secondary-fixed/50 px-2.5 py-0.5 rounded-full">
                   {tripDays}-Day Curated Plan
@@ -292,19 +324,19 @@ export default function Recommendations() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="font-headline-md text-headline-md text-on-surface font-bold">
-                    {activeIntelligence.destination.name}
+                    {activeOrFallbackIntelligence.destination.name}
                   </h2>
                   <p className="text-body-sm text-on-surface-variant flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
-                    <span>{activeIntelligence.destination.address || `${activeIntelligence.destination.district}, West Bengal`}</span>
+                    <span>{activeOrFallbackIntelligence.destination.address || `${activeOrFallbackIntelligence.destination.district}, West Bengal`}</span>
                     <span>•</span>
-                    <span className="font-semibold text-secondary">{activeIntelligence.destination.category}</span>
-                    {userLocation && activeIntelligence.destination.latitude && activeIntelligence.destination.longitude ? (
+                    <span className="font-semibold text-secondary">{activeOrFallbackIntelligence.destination.category}</span>
+                    {userLocation && activeOrFallbackIntelligence.destination.latitude && activeOrFallbackIntelligence.destination.longitude ? (
                       <>
                         <span>•</span>
                         <span className="inline-flex items-center gap-1 text-primary font-semibold">
                           <span className="material-symbols-outlined text-[14px]">near_me</span>
-                          {formatDistance(activeIntelligence.user_distance?.distance_km ?? calculateHaversineDistance(userLocation.latitude, userLocation.longitude, activeIntelligence.destination.latitude, activeIntelligence.destination.longitude))} from your location
+                          {formatDistance(activeOrFallbackIntelligence.user_distance?.distance_km ?? calculateHaversineDistance(userLocation.latitude, userLocation.longitude, activeOrFallbackIntelligence.destination.latitude, activeOrFallbackIntelligence.destination.longitude))} from your location
                         </span>
                       </>
                     ) : (
@@ -327,19 +359,23 @@ export default function Recommendations() {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="px-3 py-1 rounded-xl bg-secondary text-on-secondary font-bold text-label-lg shadow-sm">
-                    {Math.min(Math.max(Math.round((activeIntelligence.destination_intelligence.match_score > 1.0 ? activeIntelligence.destination_intelligence.match_score / 2.5 : activeIntelligence.destination_intelligence.match_score) * 100), 50), 99)}% Match
+                    {Math.min(Math.max(Math.round((activeOrFallbackIntelligence.destination_intelligence.match_score > 1.0 ? activeOrFallbackIntelligence.destination_intelligence.match_score / 2.5 : activeOrFallbackIntelligence.destination_intelligence.match_score) * 100), 50), 99)}% Match
                   </div>
                 </div>
               </div>
 
-              {/* AI Explanation / Reasoning */}
-              {activeIntelligence.explanation && (
+              {/* AI / Model 2 Explanation / Reasoning */}
+              {activeOrFallbackIntelligence.explanation && (
                 <div className="mt-2.5 p-3 rounded-xl bg-surface-container/70 border border-outline-variant/30 text-body-sm text-on-surface leading-relaxed">
                   <span className="font-semibold text-primary block mb-0.5 flex items-center gap-1 text-[13px]">
-                    <span className="material-symbols-outlined text-[15px]">auto_awesome</span>
-                    Gemma Generative Synthesis &amp; Match Reasoning:
+                    <span className="material-symbols-outlined text-[15px]">
+                      {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma' ? 'auto_awesome' : 'insights'}
+                    </span>
+                    {activeOrFallbackIntelligence.generation_metadata?.source === 'gemma'
+                      ? 'Gemma Generative Synthesis & Match Reasoning:'
+                      : 'Model 2 Calibrated Match Reasoning:'}
                   </span>
-                  {activeIntelligence.explanation}
+                  {activeOrFallbackIntelligence.explanation}
                 </div>
               )}
 
@@ -348,19 +384,19 @@ export default function Recommendations() {
                 <div className="p-2 rounded-xl bg-surface-container-high/70">
                   <span className="text-[10px] uppercase font-bold text-on-surface-variant block">Season SSI</span>
                   <span className="font-label-md font-bold text-primary">
-                    {activeIntelligence.destination_intelligence.ssi.toFixed(2)}
+                    {activeOrFallbackIntelligence.destination_intelligence.ssi.toFixed(2)}
                   </span>
                 </div>
                 <div className="p-2 rounded-xl bg-surface-container-high/70">
                   <span className="text-[10px] uppercase font-bold text-on-surface-variant block">Tranquility</span>
                   <span className="font-label-md font-bold text-secondary">
-                    {Math.round(activeIntelligence.destination_intelligence.underrated_score * 100)}%
+                    {Math.round(activeOrFallbackIntelligence.destination_intelligence.underrated_score * 100)}%
                   </span>
                 </div>
                 <div className="p-2 rounded-xl bg-surface-container-high/70">
                   <span className="text-[10px] uppercase font-bold text-on-surface-variant block">Crowd Index</span>
                   <span className="font-label-md font-bold text-on-surface">
-                    {activeIntelligence.destination_intelligence.live_cpi.toFixed(2)}
+                    {activeOrFallbackIntelligence.destination_intelligence.live_cpi.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -369,16 +405,16 @@ export default function Recommendations() {
               <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-outline-variant/30">
                 <button
                   id="view-gemma-itinerary-btn"
-                  onClick={() => navigate(`/destination/${activeIntelligence.destination.id}`)}
+                  onClick={() => navigate(`/destination/${activeOrFallbackIntelligence.destination.id}`)}
                   className="flex-1 py-2.5 px-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-                  <span>View {tripDays}-Day AI Itinerary</span>
+                  <span>View {tripDays}-Day Curated Plan</span>
                 </button>
                 <button
                   id="locate-gemma-pin-btn"
                   onClick={() => {
-                    handleSelectCard(activeIntelligence.destination.id);
+                    handleSelectCard(activeOrFallbackIntelligence.destination.id);
                     const mapElem = document.getElementById('recommendations-map-section');
                     if (mapElem) {
                       mapElem.scrollIntoView({ behavior: 'smooth', block: 'center' });

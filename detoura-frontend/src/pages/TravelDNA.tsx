@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDetoura } from '../DetouraContext';
 import { useAuth } from '../AuthContext';
-import { getRecommendations, saveTravelDnaToBackend, fetchTravelDnaFromBackend } from '../api';
+import { getRecommendations, saveTravelDnaToBackend, fetchTravelDnaFromBackend, synthesizeOfflineIntelligence, computeOfflineRecommendations } from '../api';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import LanguageSelector from '../components/LanguageSelector';
@@ -258,8 +258,25 @@ export default function TravelDNA() {
         throw new Error("No recommendations found for this configuration. Try broadening your budget or preferences.");
       }
 
-      // Check if top recommendation has model3_payload
-      const topModel3 = response.find(r => r.model3_payload)?.model3_payload;
+      // Strictly synchronize active intelligence with top ranked recommendation
+      const topRec = response[0];
+      const topModel3 = topRec?.model3_payload || synthesizeOfflineIntelligence({
+        destination_id: topRec.destination_id,
+        user_prefs: {
+          adventure: food / 100,
+          nature: nature / 100,
+          relaxation: relax / 100,
+          culture: culture / 100,
+        },
+        weights: { w_sim: 1.0, w_season: 1.0, w_crowd: 1.0, w_gem: 1.0 },
+        month: activeTravelMonth,
+        place_types: selectedPlaceTypes,
+        budget_max: selectedBudgetMax,
+        budget_tier: selectedBudgetTier !== 'all' ? selectedBudgetTier : undefined,
+        trip_days: tripDays,
+        language: language,
+      });
+
       if (topModel3) {
         setActiveIntelligence(topModel3);
       }
@@ -268,7 +285,7 @@ export default function TravelDNA() {
     } catch (error: any) {
       console.warn('[TRAVEL DNA] Backend notice, falling back to local Model 2 recommendations:', error);
       try {
-        const offlineRecs = await getRecommendations({
+        const offlineRecs = computeOfflineRecommendations({
           user_prefs: {
             adventure: food / 100,
             nature: nature / 100,
@@ -282,8 +299,28 @@ export default function TravelDNA() {
           budget_tier: selectedBudgetTier !== 'all' ? selectedBudgetTier : undefined,
           trip_days: tripDays,
           language: language,
-        });
+        }, language);
         if (offlineRecs && offlineRecs.length > 0) {
+          const topRec = offlineRecs[0];
+          const topIntel = topRec.model3_payload || synthesizeOfflineIntelligence({
+            destination_id: topRec.destination_id,
+            user_prefs: {
+              adventure: food / 100,
+              nature: nature / 100,
+              relaxation: relax / 100,
+              culture: culture / 100,
+            },
+            weights: { w_sim: 1.0, w_season: 1.0, w_crowd: 1.0, w_gem: 1.0 },
+            month: activeTravelMonth,
+            place_types: selectedPlaceTypes,
+            budget_max: selectedBudgetMax,
+            budget_tier: selectedBudgetTier !== 'all' ? selectedBudgetTier : undefined,
+            trip_days: tripDays,
+            language: language,
+          });
+          if (topIntel) {
+            setActiveIntelligence(topIntel);
+          }
           setRecommendations(offlineRecs);
           navigate("/recommendations");
           return;
