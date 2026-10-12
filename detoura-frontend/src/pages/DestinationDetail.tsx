@@ -36,6 +36,7 @@ export default function DestinationDetail() {
 
   const [heroImage, setHeroImage] = useState<string | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [isSavingTrip, setIsSavingTrip] = useState(false);
   const [synthesisError, setSynthesisError] = useState<string | null>(null);
   const [selectedDayTab, setSelectedDayTab] = useState<string>('all');
   const [localDestination, setLocalDestination] = useState<RecommendResponse | null>(() => {
@@ -366,7 +367,10 @@ export default function DestinationDetail() {
           <div className="flex items-center gap-2">
             <LanguageSelector />
             <button 
+              disabled={isSavingTrip}
               onClick={async () => {
+                if (isSavingTrip) return;
+                setIsSavingTrip(true);
                 try {
                   if (isSaved) {
                     await removeTrip(currentDest.destination_id);
@@ -375,15 +379,17 @@ export default function DestinationDetail() {
                   }
                 } catch (err: any) {
                   alert(err?.message || 'Failed to update saved trips.');
+                } finally {
+                  setIsSavingTrip(false);
                 }
               }}
               aria-label={isSaved ? t('destinationDetail.savedTrip') : t('destinationDetail.saveTrip')} 
               className={`w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center active:scale-90 transition-transform shadow-sm cursor-pointer ${
                 isSaved ? 'text-primary' : 'text-on-surface-variant'
-              }`}
+              } ${isSavingTrip ? 'opacity-70 cursor-wait' : ''}`}
             >
-              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                {isSaved ? 'bookmark' : 'bookmark_border'}
+              <span className={`material-symbols-outlined text-[20px] ${isSavingTrip ? 'animate-spin' : ''}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+                {isSavingTrip ? 'progress_activity' : (isSaved ? 'bookmark' : 'bookmark_border')}
               </span>
             </button>
           </div>

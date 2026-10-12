@@ -58,8 +58,30 @@ export interface DetouraContextType {
 
 const DetouraContext = createContext<DetouraContextType | undefined>(undefined);
 
+/**
+ * Safely sanitizes an object for Firestore by converting undefined to null or omitting,
+ * ensuring no unsupported values cause Firestore serialization rejections.
+ */
+function sanitizeForFirestore(val: any): any {
+  if (val === undefined) return null;
+  if (val === null) return null;
+  if (Array.isArray(val)) {
+    return val.map(sanitizeForFirestore);
+  }
+  if (typeof val === 'object' && !(val instanceof Date) && typeof (val as any)?.toMillis !== 'function') {
+    const res: Record<string, any> = {};
+    for (const [k, v] of Object.entries(val)) {
+      if (v !== undefined) {
+        res[k] = sanitizeForFirestore(v);
+      }
+    }
+    return res;
+  }
+  return val;
+}
+
 export function DetouraProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [recommendations, setRecommendations] = useState<RecommendResponse[]>([]);
   const [activeIntelligence, setActiveIntelligence] = useState<Model3Recommendation | null>(null);
   const [savedTrips, setSavedTrips] = useState<RecommendResponse[]>([]);
@@ -302,96 +324,168 @@ export function DetouraProvider({ children }: { children: ReactNode }) {
   const addTrip = async (trip: RecommendResponse) => {
     if (savedTrips.some((t) => t.destination_id === trip.destination_id)) return;
 
-    if (!user) {
+    // 1. Wait for Firebase authentication initialization if in progress
+    if (authLoading) {
+      try {
+        if (typeof (auth as any).authStateReady === 'function') {
+          await (auth as any).authStateReady();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    // 2. Strictly verify authenticated Firebase user
+    const currentFirebaseUser = auth.currentUser;
+    const activeUid = currentFirebaseUser?.uid || user?.uid;
+
+    if (!currentFirebaseUser || !activeUid) {
       throw new Error("Please sign in to save trips to your DETOURA passport.");
     }
 
-    const tripId = trip.destination_id;
-    const tripData = {
-      destination_id: trip.destination_id,
-      name: trip.name,
+    if (currentFirebaseUser.uid !== activeUid) {
+      throw new Error("Authentication mismatch. Please sign in again.");
+    }
+
+    const tripId = String(trip.destination_id || '').trim();
+    if (!tripId) {
+      throw new Error("Invalid destination ID. Cannot save trip.");
+    }
+
+    // 3. Serialize and sanitize payload to prevent unsupported Firestore types
+    const rawTripData: Record<string, any> = {
+      destination_id: tripId,
+      name: trip.name || 'Unknown Destination',
       district: trip.district || '',
       category: trip.category || '',
       estimated_daily_inr: trip.estimated_daily_inr ?? trip.budget_per_day ?? 2000,
       budget_tier: trip.budget_tier ?? 2,
       savedAt: serverTimestamp(),
       image_url: trip.image_url || null,
-      match_score: trip.match_score || null,
-      distance_km: trip.distance_km || null,
+      match_score: typeof trip.match_score === 'number' ? trip.match_score : null,
+      distance_km: typeof trip.distance_km === 'number' ? trip.distance_km : null,
       recommended_duration_days: trip.recommended_duration_days || 2,
       budget_per_day: trip.budget_per_day || trip.estimated_daily_inr || 2000,
       travel_style: trip.travel_style || trip.category || 'Regional Discovery',
       description: trip.description || '',
-      highlights: trip.highlights || [],
-      detoura_score: trip.detoura_score || 0,
-      similarity_score: trip.similarity_score || 0,
-      cpi_used: trip.cpi_used || 0,
-      underrated_score: trip.underrated_score || 0,
-      ssi: trip.ssi || 0,
-      latitude: trip.latitude || null,
-      longitude: trip.longitude || null
+      highlights: Array.isArray(trip.highlights) ? trip.highlights : [],
+      detoura_score: typeof trip.detoura_score === 'number' ? trip.detoura_score : 0,
+      similarity_score: typeof trip.similarity_score === 'number' ? trip.similarity_score : 0,
+      cpi_used: typeof trip.cpi_used === 'number' ? trip.cpi_used : 0,
+      underrated_score: typeof trip.underrated_score === 'number' ? trip.underrated_score : 0,
+      ssi: typeof trip.ssi === 'number' ? trip.ssi : 0,
+      latitude: typeof trip.latitude === 'number' ? trip.latitude : null,
+      longitude: typeof trip.longitude === 'number' ? trip.longitude : null
     };
 
+    const tripData = sanitizeForFirestore(rawTripData);
     let writeConfirmed = false;
+    let directClientError: any = null;
 
-    // 1. Attempt direct Firestore write to users/{userId}/trips/{tripId}
+    // 4. Attempt direct Firestore write to users/{activeUid}/trips/{tripId}
+    const tripDocRef = doc(db, 'users', activeUid, 'trips', tripId);
     try {
-      const tripDocRef = doc(db, 'users', user.uid, 'trips', tripId);
       await setDoc(tripDocRef, tripData, { merge: true });
       writeConfirmed = true;
     } catch (err: any) {
-      console.warn('[Firestore] Direct client trip write notice, attempting backend Firestore API:', err?.message || err);
+      directClientError = err;
+      const isSecurityRejection = err?.code === 'permission-denied';
+      console.error('[Detoura Firestore Diagnostic]', {
+        operation: 'addTrip',
+        isAuthenticated: !!currentFirebaseUser,
+        uid: activeUid,
+        path: `users/${activeUid}/trips/${tripId}`,
+        errorCode: err?.code || 'unknown',
+        errorMessage: err?.message || String(err),
+        isSecurityRuleRejection: isSecurityRejection,
+        timestamp: new Date().toISOString()
+      });
     }
 
-    // 2. Fallback to authenticated backend Firestore write
-    if (!writeConfirmed) {
+    // 5. Fallback to authenticated backend Firestore write if client had transient network error (not permission rejection)
+    if (!writeConfirmed && directClientError?.code !== 'permission-denied' && directClientError?.code !== 'invalid-argument') {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const ok = await syncTripToBackend(user.uid, trip, idToken);
+        const idToken = await currentFirebaseUser.getIdToken();
+        const ok = await syncTripToBackend(activeUid, trip, idToken);
         if (ok) writeConfirmed = true;
       } catch (backendErr) {
-        console.error('Backend syncTrip fallback failed:', backendErr);
+        console.warn('[Detoura Firestore] Backend syncTrip fallback notice:', backendErr);
       }
     }
 
-    // Only update UI after confirmed Firestore write
+    // 6. Only update UI after confirmed Firestore write
     if (writeConfirmed) {
       const updated = [trip, ...savedTrips];
       setSavedTrips(updated);
-      const storageKey = `detoura_saved_trips_${user.uid}`;
+      const storageKey = `detoura_saved_trips_${activeUid}`;
       localStorage.setItem(storageKey, JSON.stringify(updated));
     } else {
-      throw new Error("Could not save trip to Cloud Firestore. Please check your connection.");
+      // Differentiate individual Firebase error codes
+      const code = directClientError?.code;
+      if (code === 'permission-denied') {
+        throw new Error("Permission denied by Cloud Firestore. You can only save trips to your own authenticated account.");
+      } else if (code === 'unauthenticated') {
+        throw new Error("Your session has expired. Please sign in again to save trips.");
+      } else if (code === 'unavailable') {
+        throw new Error("Cloud Firestore is temporarily unavailable. Please check your internet connection.");
+      } else if (code === 'invalid-argument') {
+        throw new Error("Invalid trip data format. Could not save to Cloud Firestore.");
+      } else if (code === 'failed-precondition') {
+        throw new Error("Operation failed due to a Firestore precondition error.");
+      } else {
+        throw new Error(directClientError?.message || "Could not save trip to Cloud Firestore. Please try again.");
+      }
     }
   };
 
   // Remove trip from Firestore subcollection users/{userId}/trips/{destination_id}
   const removeTrip = async (destinationId: string) => {
-    if (!user) {
+    if (authLoading) {
+      try {
+        if (typeof (auth as any).authStateReady === 'function') {
+          await (auth as any).authStateReady();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    const currentFirebaseUser = auth.currentUser;
+    const activeUid = currentFirebaseUser?.uid || user?.uid;
+
+    if (!currentFirebaseUser || !activeUid) {
       const updated = savedTrips.filter((t) => t.destination_id !== destinationId);
       setSavedTrips(updated);
       return;
     }
 
     let deleteConfirmed = false;
+    let directClientError: any = null;
+    const tripDocRef = doc(db, 'users', activeUid, 'trips', destinationId);
 
-    // 1. Attempt direct Firestore deletion from users/{userId}/trips/{destinationId}
     try {
-      const tripDocRef = doc(db, 'users', user.uid, 'trips', destinationId);
       await deleteDoc(tripDocRef);
       deleteConfirmed = true;
     } catch (err: any) {
-      console.warn('[Firestore] Direct client trip delete notice, attempting backend Firestore API:', err?.message || err);
+      directClientError = err;
+      console.error('[Detoura Firestore Diagnostic]', {
+        operation: 'removeTrip',
+        isAuthenticated: !!currentFirebaseUser,
+        uid: activeUid,
+        path: `users/${activeUid}/trips/${destinationId}`,
+        errorCode: err?.code || 'unknown',
+        errorMessage: err?.message || String(err),
+        timestamp: new Date().toISOString()
+      });
     }
 
-    // 2. Fallback to authenticated backend Firestore delete
-    if (!deleteConfirmed) {
+    if (!deleteConfirmed && directClientError?.code !== 'permission-denied') {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const ok = await deleteTripFromBackend(user.uid, destinationId, idToken);
+        const idToken = await currentFirebaseUser.getIdToken();
+        const ok = await deleteTripFromBackend(activeUid, destinationId, idToken);
         if (ok) deleteConfirmed = true;
       } catch (backendErr) {
-        console.error('Backend deleteTrip fallback failed:', backendErr);
+        console.warn('[Detoura Firestore] Backend deleteTrip notice:', backendErr);
       }
     }
 
@@ -399,10 +493,17 @@ export function DetouraProvider({ children }: { children: ReactNode }) {
     if (deleteConfirmed) {
       const updated = savedTrips.filter((t) => t.destination_id !== destinationId);
       setSavedTrips(updated);
-      const storageKey = `detoura_saved_trips_${user.uid}`;
+      const storageKey = `detoura_saved_trips_${activeUid}`;
       localStorage.setItem(storageKey, JSON.stringify(updated));
     } else {
-      throw new Error("Could not delete trip from Cloud Firestore.");
+      const code = directClientError?.code;
+      if (code === 'permission-denied') {
+        throw new Error("Permission denied. You can only remove trips from your own account.");
+      } else if (code === 'unauthenticated') {
+        throw new Error("Your session has expired. Please sign in again.");
+      } else {
+        throw new Error(directClientError?.message || "Could not delete trip from Cloud Firestore.");
+      }
     }
   };
 

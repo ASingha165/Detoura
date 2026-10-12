@@ -267,7 +267,13 @@ export default function Profile() {
                       {t('profile.viewItinerary')}
                     </button>
                     <button 
-                      onClick={() => removeTrip(trip.destination_id)}
+                      onClick={async () => {
+                        try {
+                          await removeTrip(trip.destination_id);
+                        } catch (err: any) {
+                          alert(err?.message || 'Failed to remove saved trip.');
+                        }
+                      }}
                       className="py-1.5 px-3 rounded-lg text-error hover:bg-error-container hover:text-on-error-container font-label-md text-label-md transition-colors cursor-pointer"
                     >
                       {t('profile.removeSaved')}

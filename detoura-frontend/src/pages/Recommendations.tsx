@@ -56,6 +56,7 @@ export default function Recommendations() {
     return selectedBudgetTier && selectedBudgetTier !== 'all' ? selectedBudgetTier : 'all';
   });
   const [selectedDestId, setSelectedDestId] = useState<string | null>(null);
+  const [savingTripId, setSavingTripId] = useState<string | null>(null);
   const [imagesMap, setImagesMap] = useState<Record<string, string>>({});
 
   // Sync selected budget to maxBudget when recommendations load
@@ -608,8 +609,11 @@ export default function Recommendations() {
 
                       <button
                         id={`save-trip-btn-${rec.destination_id}`}
+                        disabled={savingTripId === rec.destination_id}
                         onClick={async (e) => {
                           e.stopPropagation();
+                          if (savingTripId === rec.destination_id) return;
+                          setSavingTripId(rec.destination_id);
                           try {
                             if (isSaved) {
                               await removeTrip(rec.destination_id);
@@ -618,16 +622,20 @@ export default function Recommendations() {
                             }
                           } catch (err: any) {
                             alert(err?.message || 'Failed to update saved trips.');
+                          } finally {
+                            setSavingTripId(null);
                           }
                         }}
                         className={`px-2.5 py-1.5 rounded-lg font-label-md text-label-md font-semibold flex items-center gap-1 transition-all active:scale-95 cursor-pointer ${
                           isSaved
                             ? 'bg-secondary-fixed text-on-secondary-fixed-variant shadow-xs'
                             : 'bg-surface-container-high hover:bg-surface-container-highest text-on-surface'
-                        }`}
+                        } ${savingTripId === rec.destination_id ? 'opacity-70 cursor-wait' : ''}`}
                       >
-                        <span className="material-symbols-outlined text-[16px]">
-                          {isSaved ? 'bookmark_added' : 'bookmark_add'}
+                        <span className={`material-symbols-outlined text-[16px] ${savingTripId === rec.destination_id ? 'animate-spin' : ''}`}>
+                          {savingTripId === rec.destination_id
+                            ? 'progress_activity'
+                            : (isSaved ? 'bookmark_added' : 'bookmark_add')}
                         </span>
                         <span>{isSaved ? t('common.saved') : t('common.save')}</span>
                       </button>
