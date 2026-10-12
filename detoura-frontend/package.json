@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "node scripts/verify-translations.js",
+    "test": "node scripts/verify-translations.js && node --experimental-strip-types scripts/test_component_localization.js",
     "preview": "vite preview"
   },
   "dependencies": {

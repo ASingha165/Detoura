@@ -14,7 +14,13 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
-import { syncTripToBackend, deleteTripFromBackend, fetchTripsFromBackend } from './api';
+import {
+  syncTripToBackend,
+  deleteTripFromBackend,
+  fetchTripsFromBackend,
+  clearRecommendationCache,
+  synthesizeOfflineIntelligence
+} from './api';
 import type { Language } from './i18n/translations';
 import {
   translate,
@@ -150,11 +156,98 @@ export function DetouraProvider({ children }: { children: ReactNode }) {
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('detoura_language', lang);
+    clearRecommendationCache();
+
+    // Re-localize active intelligence immediately
+    setActiveIntelligenceState((prev) => {
+      if (!prev) return null;
+      const destId = prev.destination?.id;
+      if (!destId) return null;
+      const synth = synthesizeOfflineIntelligence({
+        destination_id: destId,
+        month: activeMonth,
+        trip_days: tripDays,
+        language: lang,
+        user_lat: userLocation?.latitude,
+        user_lon: userLocation?.longitude,
+      });
+      if (synth) {
+        try {
+          sessionStorage.setItem('detoura_last_active_intelligence', JSON.stringify(synth));
+        } catch {}
+        return synth;
+      }
+      return prev;
+    });
+
+    // Re-localize all items in recommendations state & sessionStorage
+    setRecommendationsState((prev) => {
+      if (!Array.isArray(prev) || prev.length === 0) return prev;
+      const updated = prev.map((r) => {
+        const locDist = localizeRegionHelper(r.district, lang);
+        const locCat = localizeCategoryHelper(r.category, lang);
+        const newAddr = formatAddressHelper(r.name, r.district, undefined, lang);
+        const newDesc = formatDestinationDescriptionHelper(r, lang);
+        let newHighlights = r.highlights;
+        if (lang === 'bn') {
+          newHighlights = [
+            r.district ? `জেলা: ${locDist}` : 'মনোরম বাংলা',
+            r.category ? `ধরণ: ${locCat}` : 'অফবিট রুট',
+            r.budget_tier === 1 ? 'বাজেট বান্ধব' : r.budget_tier === 3 ? 'প্রিমিয়াম ঐতিহ্য' : 'পরিমিত স্বাচ্ছন্দ্য'
+          ];
+        } else if (lang === 'hi') {
+          newHighlights = [
+            r.district ? `ज़िला: ${locDist}` : 'सुंदर बंगाल',
+            r.category ? `श्रेणी: ${locCat}` : 'ऑफबीट मार्ग',
+            r.budget_tier === 1 ? 'बजट अनुकूल' : r.budget_tier === 3 ? 'प्रीमियम हेरिटेज' : 'मध्यम आराम'
+          ];
+        } else {
+          newHighlights = [
+            r.district ? `District: ${r.district}` : 'Scenic Bengal',
+            r.category ? `Vibe: ${r.category}` : 'Offbeat Route',
+            r.budget_tier === 1 ? 'Budget Friendly' : r.budget_tier === 3 ? 'Premium Heritage' : 'Moderate Comfort'
+          ];
+        }
+        let updatedModel3 = r.model3_payload;
+        if (updatedModel3 && updatedModel3.destination?.id) {
+          updatedModel3 = synthesizeOfflineIntelligence({
+            destination_id: updatedModel3.destination.id,
+            month: activeMonth,
+            trip_days: tripDays,
+            language: lang,
+            user_lat: userLocation?.latitude,
+            user_lon: userLocation?.longitude,
+          }) || undefined;
+        }
+        return {
+          ...r,
+          address: newAddr,
+          description: newDesc,
+          highlights: newHighlights,
+          model3_payload: updatedModel3
+        };
+      });
+      try {
+        sessionStorage.setItem('detoura_last_recommendations', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = language;
+    }
+    // Check if initial stored recommendations need language alignment on boot/refresh
+    if (language !== 'en' && recommendations.length > 0) {
+      const needsAlignment = recommendations.some((r) => {
+        const desc = r.description || '';
+        return (language === 'hi' && !/[\u0900-\u097F]/.test(desc)) ||
+               (language === 'bn' && !/[\u0980-\u09FF]/.test(desc));
+      });
+      if (needsAlignment) {
+        setLanguage(language);
+      }
     }
   }, [language]);
 

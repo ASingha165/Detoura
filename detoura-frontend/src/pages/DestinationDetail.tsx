@@ -907,16 +907,21 @@ export default function DestinationDetail() {
             <ul className="space-y-2">
               {currentDest.highlights.map((highlight, idx) => {
                 let localizedHighlight = highlight;
-                if (highlight.startsWith('District:')) {
-                  const distVal = highlight.replace('District:', '').trim();
+                if (highlight.startsWith('District:') || highlight.startsWith('জেলা:') || highlight.startsWith('ज़िला:')) {
+                  const distVal = highlight.replace(/^(District:|জেলা:|ज़िला:)/, '').trim();
                   localizedHighlight = `${t('destinationDetail.district')}: ${localizeRegion(distVal)}`;
-                } else if (highlight.startsWith('Vibe:')) {
-                  const vibeVal = highlight.replace('Vibe:', '').trim();
+                } else if (highlight.startsWith('Vibe:') || highlight.startsWith('ধরণ:') || highlight.startsWith('श्रेणी:')) {
+                  const vibeVal = highlight.replace(/^(Vibe:|ধরণ:|श्रेणी:)/, '').trim();
                   localizedHighlight = `${t('destinationDetail.vibe')}: ${localizeCategory(vibeVal)}`;
-                } else if (highlight === 'Budget Friendly' || highlight === 'Moderate Comfort' || highlight === 'Premium Heritage' || highlight === 'Comfortable Stay') {
-                  const comfortLabel = highlight === 'Budget Friendly'
+                } else if (
+                  highlight === 'Budget Friendly' || highlight === 'বাজেট বান্ধব' || highlight === 'बजट अनुकूल' ||
+                  highlight === 'Moderate Comfort' || highlight === 'পরিমিত স্বাচ্ছন্দ্য' || highlight === 'मध्यम आराम' ||
+                  highlight === 'Premium Heritage' || highlight === 'প্রিমিয়াম ঐতিহ্য' || highlight === 'प्रीमियम हेरिटेज' ||
+                  highlight === 'Comfortable Stay'
+                ) {
+                  const comfortLabel = (highlight.includes('Budget') || highlight.includes('বান্ধব') || highlight.includes('अनुकूल'))
                     ? t('destinationDetail.budgetFriendly')
-                    : highlight === 'Premium Heritage'
+                    : (highlight.includes('Premium') || highlight.includes('ঐতিহ্য') || highlight.includes('हेरिटेज'))
                     ? t('destinationDetail.premiumHeritage')
                     : t('destinationDetail.moderateComfort');
                   localizedHighlight = `${t('destinationDetail.comfort')}: ${comfortLabel}`;
