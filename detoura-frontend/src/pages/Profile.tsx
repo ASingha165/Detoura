@@ -8,7 +8,17 @@ import LanguageSelector from '../components/LanguageSelector';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { savedTrips, removeTrip, isLoadingTrips, t } = useDetoura();
+  const {
+    savedTrips,
+    removeTrip,
+    isLoadingTrips,
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay,
+    formatDuration
+  } = useDetoura();
   const { user, logout } = useAuth();
   const [travelDna, setTravelDna] = useState<{
     nature?: number;
@@ -205,7 +215,7 @@ export default function Profile() {
               <div className="flex items-center gap-space-xs">
                 <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('profile.mySavedTrips')}</h2>
                 <span className="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">
-                  {savedTrips.length} {t('nav.discover')}
+                  {savedTrips.length} {t('common.saved')}
                 </span>
               </div>
               {savedTrips.length > 0 && (
@@ -239,21 +249,21 @@ export default function Profile() {
                     <div className="min-w-0 flex-1">
                       <span className="inline-flex items-center gap-1 text-primary font-label-sm text-label-sm uppercase tracking-wider font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        {trip.district || 'West Bengal'} &bull; {trip.category || t('common.spot')}
+                        {localizeRegion(trip.district)} &bull; {localizeCategory(trip.category)}
                       </span>
-                      <h3 className="font-headline-md text-headline-md text-on-surface mt-1 truncate">{trip.name}</h3>
+                      <h3 className="font-headline-md text-headline-md text-on-surface mt-1 truncate">{localizeDestinationName(trip.name)}</h3>
                       <div className="flex items-center gap-3 mt-1 text-on-surface-variant font-label-md text-label-md">
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[15px]">calendar_today</span>
-                          {trip.recommended_duration_days || 2} {t('common.days')}
+                          {formatDuration(trip.recommended_duration_days || 2)}
                         </span>
                         <span className="flex items-center gap-1 font-semibold text-secondary">
-                          ₹{trip.estimated_daily_inr ?? trip.budget_per_day ?? 2000}/{t('common.perDay')}
+                          {formatPricePerDay(trip.estimated_daily_inr ?? trip.budget_per_day ?? 2000)}
                         </span>
                       </div>
                     </div>
                     <img
-                      alt={trip.name}
+                      alt={localizeDestinationName(trip.name)}
                       className="w-16 h-16 rounded-lg object-cover shrink-0 ml-2"
                       src={trip.image_url || "https://images.unsplash.com/photo-1598091383021-15ddea10925d?q=80&w=2070&auto=format&fit=crop"}
                     />

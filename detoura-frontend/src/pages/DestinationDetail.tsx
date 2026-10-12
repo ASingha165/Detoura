@@ -31,7 +31,12 @@ export default function DestinationDetail() {
     locationStatus,
     requestUserLocation,
     language,
-    t
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay,
+    formatDuration
   } = useDetoura();
 
   const [heroImage, setHeroImage] = useState<string | null>(null);
@@ -412,10 +417,10 @@ export default function DestinationDetail() {
             <div className="absolute top-3.5 left-3.5 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface/90 backdrop-blur-md text-secondary font-label-sm text-label-sm uppercase tracking-wider shadow-sm font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-                {currentDest.district || 'West Bengal'}
+                {localizeRegion(currentDest.district)}
               </span>
               <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white font-label-sm text-label-sm font-medium">
-                {currentDest.category || 'Spot'}
+                {localizeCategory(currentDest.category)}
               </span>
             </div>
 
@@ -436,7 +441,7 @@ export default function DestinationDetail() {
                 </span>
               </div>
               <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-white font-bold leading-tight drop-shadow-sm">
-                {currentDest.name}
+                {localizeDestinationName(currentDest.name)}
               </h1>
             </div>
           </div>
@@ -452,7 +457,7 @@ export default function DestinationDetail() {
               <div className="min-w-0">
                 <span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider block">{t('destinationDetail.duration')}</span>
                 <span className="font-label-md text-label-md text-on-surface font-semibold truncate block">
-                  {tripDays || currentDest.recommended_duration_days || 3} {t('common.days')}
+                  {formatDuration(tripDays || currentDest.recommended_duration_days || 3)}
                 </span>
               </div>
             </div>
@@ -464,7 +469,7 @@ export default function DestinationDetail() {
               <div className="min-w-0">
                 <span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider block">{t('destinationDetail.realBudget')}</span>
                 <span className="font-label-md text-label-md text-secondary font-bold truncate block">
-                  ₹{dailyCost}/{t('common.day')}
+                  {formatPricePerDay(dailyCost)}
                 </span>
               </div>
             </div>
@@ -513,7 +518,7 @@ export default function DestinationDetail() {
             <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col gap-1">
               <span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">{t('destinationDetail.address')}</span>
               <p className="font-body-md text-body-md text-on-surface font-semibold">
-                {currentDest.address || (currentDest.district ? `${currentDest.name}, ${currentDest.district}, West Bengal` : 'West Bengal')}
+                {currentDest.address || (currentDest.district ? `${localizeDestinationName(currentDest.name)}, ${localizeRegion(currentDest.district)}, ${t('regions.westBengal')}` : t('regions.westBengal'))}
               </p>
               {currentDest.latitude && currentDest.longitude ? (
                 <span className="font-label-sm text-[11px] text-on-surface-variant">
@@ -617,7 +622,7 @@ export default function DestinationDetail() {
               </span>
             </div>
             <p className="font-body-md text-body-md text-on-surface leading-relaxed">
-              {aiExplanation || `${currentDest.name} in ${currentDest.district || 'West Bengal'} was calibrated using high cosine similarity to your travel weights, high offbeat index, and comfortable seasonal parameters.`}
+              {aiExplanation || `${localizeDestinationName(currentDest.name)} in ${localizeRegion(currentDest.district)} was calibrated using high cosine similarity to your travel weights, high offbeat index, and comfortable seasonal parameters.`}
             </p>
           </div>
         </div>
@@ -865,9 +870,11 @@ export default function DestinationDetail() {
               {currentDest.highlights.map((highlight, idx) => {
                 let localizedHighlight = highlight;
                 if (highlight.startsWith('District:')) {
-                  localizedHighlight = `${t('destinationDetail.district')}: ${highlight.replace('District:', '').trim()}`;
+                  const distVal = highlight.replace('District:', '').trim();
+                  localizedHighlight = `${t('destinationDetail.district')}: ${localizeRegion(distVal)}`;
                 } else if (highlight.startsWith('Vibe:')) {
-                  localizedHighlight = `${t('destinationDetail.vibe')}: ${highlight.replace('Vibe:', '').trim()}`;
+                  const vibeVal = highlight.replace('Vibe:', '').trim();
+                  localizedHighlight = `${t('destinationDetail.vibe')}: ${localizeCategory(vibeVal)}`;
                 } else if (highlight === 'Budget Friendly' || highlight === 'Moderate Comfort' || highlight === 'Premium Heritage' || highlight === 'Comfortable Stay') {
                   const comfortLabel = highlight === 'Budget Friendly'
                     ? t('destinationDetail.budgetFriendly')

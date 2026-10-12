@@ -16,7 +16,14 @@ import {
 import { auth, db } from './firebase';
 import { syncTripToBackend, deleteTripFromBackend, fetchTripsFromBackend } from './api';
 import type { Language } from './i18n/translations';
-import { translate } from './i18n/translations';
+import {
+  translate,
+  localizeCategory as localizeCategoryHelper,
+  localizeRegion as localizeRegionHelper,
+  localizeDestinationName as localizeDestinationNameHelper,
+  formatPricePerDay as formatPricePerDayHelper,
+  formatDuration as formatDurationHelper
+} from './i18n/translations';
 
 export interface DetouraContextType {
   recommendations: RecommendResponse[];
@@ -28,10 +35,15 @@ export interface DetouraContextType {
   removeTrip: (destinationId: string) => Promise<void>;
   isLoadingTrips: boolean;
   refreshTrips: () => Promise<void>;
-  // Language localization state
+  // Language localization state & helpers
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (keyPath: string, fallback?: string) => string;
+  localizeCategory: (cat?: string) => string;
+  localizeRegion: (reg?: string) => string;
+  localizeDestinationName: (name?: string) => string;
+  formatPricePerDay: (amount?: number | string) => string;
+  formatDuration: (days?: number | string) => string;
   // Season / Month state
   seasonMode: 'current' | 'custom';
   setSeasonMode: (mode: 'current' | 'custom') => void;
@@ -581,7 +593,12 @@ export function DetouraProvider({ children }: { children: ReactNode }) {
         requestUserLocation,
         language,
         setLanguage,
-        t
+        t,
+        localizeCategory: (cat?: string) => localizeCategoryHelper(cat, language),
+        localizeRegion: (reg?: string) => localizeRegionHelper(reg, language),
+        localizeDestinationName: (name?: string) => localizeDestinationNameHelper(name, language),
+        formatPricePerDay: (amount?: number | string) => formatPricePerDayHelper(amount, language),
+        formatDuration: (days?: number | string) => formatDurationHelper(days, language),
       }}
     >
       {children}
@@ -598,6 +615,25 @@ export function useDetoura() {
 }
 
 export function useTranslation() {
-  const { language, setLanguage, t } = useDetoura();
-  return { language, setLanguage, t };
+  const {
+    language,
+    setLanguage,
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay,
+    formatDuration
+  } = useDetoura();
+
+  return {
+    language,
+    setLanguage,
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay,
+    formatDuration
+  };
 }

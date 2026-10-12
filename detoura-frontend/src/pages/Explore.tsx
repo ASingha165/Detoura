@@ -21,7 +21,13 @@ const CATEGORIES_DEF = [
 export default function Explore() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const {
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay
+  } = useTranslation();
   const mapSectionRef = useRef<HTMLElement>(null);
 
   const categories = useMemo(() => 
@@ -250,7 +256,7 @@ export default function Explore() {
               <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('explore.topographicNavigator')}</h2>
             </div>
             <span className="font-label-md text-label-md text-secondary font-semibold uppercase tracking-wider">
-              West Bengal ({filteredDestinations.length})
+              {t('regions.westBengal')} ({filteredDestinations.length})
             </span>
           </div>
 
@@ -299,7 +305,7 @@ export default function Explore() {
                   {t('explore.activeSelection')}
                 </div>
                 <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white font-label-sm text-[10px]">
-                  {selectedDestination.district || 'West Bengal'}
+                  {localizeRegion(selectedDestination.district)}
                 </div>
               </div>
 
@@ -307,17 +313,17 @@ export default function Explore() {
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider truncate">
-                      {selectedDestination.category || t('common.spot')}
+                      {localizeCategory(selectedDestination.category)}
                     </span>
                     <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">
                       ID: {selectedDestination.destination_id}
                     </span>
                   </div>
                   <h3 className="font-headline-sm text-[18px] font-bold text-on-surface mt-1 leading-tight">
-                    {selectedDestination.name}
+                    {localizeDestinationName(selectedDestination.name)}
                   </h3>
                   <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">
-                    {selectedDestination.district} • Tier {selectedDestination.budget_tier} • {t('recommendations.offbeatLabel')}: {Math.round((selectedDestination.underrated_score || 0.5) * 100)}% • {t('recommendations.crowdPressureLabel')}: {Math.round((selectedDestination.crowd_pressure_index || 0.4) * 100)}%
+                    {localizeRegion(selectedDestination.district)} • {t('recommendations.tierLabel')} {selectedDestination.budget_tier} • {t('recommendations.offbeatLabel')}: {Math.round((selectedDestination.underrated_score || 0.5) * 100)}% • {t('recommendations.crowdPressureLabel')}: {Math.round((selectedDestination.crowd_pressure_index || 0.4) * 100)}%
                   </p>
                 </div>
 
@@ -325,7 +331,7 @@ export default function Explore() {
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-secondary"></span>
                     <span className="font-label-md text-label-md text-on-surface font-semibold">
-                      ₹{Math.round(selectedDestination.estimated_daily_inr || 1800)}{t('common.perDay')}
+                      {formatPricePerDay(selectedDestination.estimated_daily_inr || 1800)}
                     </span>
                   </div>
 
@@ -413,16 +419,16 @@ export default function Explore() {
                         {Math.min(Math.max(Math.round(((dest.detoura_score || 1.2) / 2.5) * 100), 50), 99)}% {t('common.match')}
                       </span>
                       <span className="px-2 py-0.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface font-label-sm text-label-sm font-medium">
-                        {dest.district || 'West Bengal'}
+                        {localizeRegion(dest.district)}
                       </span>
                     </div>
                     <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-on-primary">
                       <span className="font-label-sm text-label-sm flex items-center gap-1 opacity-90 truncate">
                         <span className="material-symbols-outlined text-[14px]">pin_drop</span>
-                        <span>{dest.district}</span>
+                        <span>{localizeRegion(dest.district)}</span>
                       </span>
                       <span className="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-black/40 backdrop-blur-xs text-primary-fixed-dim shrink-0">
-                        {dest.category || t('common.spot')}
+                        {localizeCategory(dest.category)}
                       </span>
                     </div>
                   </div>
@@ -430,10 +436,10 @@ export default function Explore() {
                   <div className="p-3.5 flex flex-col flex-1 justify-between gap-2.5">
                     <div>
                       <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">
-                        {dest.name}
+                        {localizeDestinationName(dest.name)}
                       </h3>
                       <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-1">
-                        {t('explore.authenticDestinationIn')} {dest.district}.
+                        {t('explore.authenticDestinationIn')} {localizeRegion(dest.district)}.
                       </p>
                     </div>
 
@@ -441,7 +447,7 @@ export default function Explore() {
                       <div className="flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-secondary"></span>
                         <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">
-                          ₹{Math.round(dest.estimated_daily_inr || 1800)}{t('common.perDay')}
+                          {formatPricePerDay(dest.estimated_daily_inr || 1800)}
                         </span>
                       </div>
                       <button
@@ -501,29 +507,29 @@ export default function Explore() {
                       className="w-full h-full object-cover"
                     />
                     <span className="absolute top-1 left-1 px-1 py-0.5 rounded bg-black/60 text-white font-label-sm text-[8px] font-bold">
-                      {gem.category?.split(' ')[0] || t('common.gem')}
+                      {localizeCategory(gem.category?.split(' ')[0])}
                     </span>
                   </div>
 
                   <div className="flex flex-col flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <span className="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider truncate">
-                        {gem.district}
+                        {localizeRegion(gem.district)}
                       </span>
                       <span className="font-label-sm text-[11px] font-semibold text-primary">
-                        ₹{Math.round(gem.estimated_daily_inr || 1600)}{t('common.perDay')}
+                        {formatPricePerDay(gem.estimated_daily_inr || 1600)}
                       </span>
                     </div>
                     <h3 className="font-headline-sm text-[15px] leading-snug text-on-surface font-semibold truncate mt-0.5">
-                      {gem.name}
+                      {localizeDestinationName(gem.name)}
                     </h3>
                     <p className="font-body-sm text-[12px] text-on-surface-variant line-clamp-1 mt-0.5">
-                      {t('explore.tranquilityQuotient')} • {Math.round((gem.underrated_score || 0.8) * 100)}% {gem.district}.
+                      {t('explore.tranquilityQuotient')} • {Math.round((gem.underrated_score || 0.8) * 100)}% {localizeRegion(gem.district)}.
                     </p>
                     <div className="flex items-center justify-between mt-1.5 text-on-surface-variant font-label-sm text-[11px]">
                       <span className="flex items-center gap-0.5 truncate">
                         <span className="material-symbols-outlined text-[13px] text-primary">pin_drop</span>
-                        {gem.district}
+                        {localizeRegion(gem.district)}
                       </span>
                       <button
                         onClick={(e) => {

@@ -28,7 +28,12 @@ export default function Recommendations() {
     locationStatus,
     requestUserLocation,
     language,
-    t
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay,
+    formatDuration
   } = useDetoura();
 
   const travelMonthName = useMemo(() => {
@@ -318,7 +323,7 @@ export default function Recommendations() {
                   </span>
                 </div>
                 <span className="text-[12px] font-bold text-secondary-fixed-variant bg-secondary-fixed/50 px-2.5 py-0.5 rounded-full">
-                  {tripDays}-{t('common.day')} {t('recommendations.curatedPlanBadge')}
+                  {formatDuration(tripDays)} • {t('recommendations.curatedPlanBadge')}
                 </span>
               </div>
 
@@ -326,13 +331,13 @@ export default function Recommendations() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="font-headline-md text-headline-md text-on-surface font-bold">
-                    {activeOrFallbackIntelligence.destination.name}
+                    {localizeDestinationName(activeOrFallbackIntelligence.destination.name)}
                   </h2>
                   <p className="text-body-sm text-on-surface-variant flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
-                    <span>{activeOrFallbackIntelligence.destination.address || `${activeOrFallbackIntelligence.destination.district}, West Bengal`}</span>
+                    <span>{activeOrFallbackIntelligence.destination.address || `${localizeRegion(activeOrFallbackIntelligence.destination.district)}, ${t('regions.westBengal')}`}</span>
                     <span>•</span>
-                    <span className="font-semibold text-secondary">{activeOrFallbackIntelligence.destination.category || t('common.spot')}</span>
+                    <span className="font-semibold text-secondary">{localizeCategory(activeOrFallbackIntelligence.destination.category)}</span>
                     {userLocation && activeOrFallbackIntelligence.destination.latitude && activeOrFallbackIntelligence.destination.longitude ? (
                       <>
                         <span>•</span>
@@ -558,7 +563,7 @@ export default function Recommendations() {
                     </span>
                     {rec.district && (
                       <span className="bg-black/50 backdrop-blur-xs text-white font-label-sm text-label-sm px-2 py-0.5 rounded">
-                        {rec.district}
+                        {localizeRegion(rec.district)}
                       </span>
                     )}
                     {userLocation && rec.latitude && rec.longitude && (
@@ -579,15 +584,15 @@ export default function Recommendations() {
                   <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between text-white">
                     <div>
                       <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed font-bold">
-                        {rec.category || t('common.spot')}
+                        {localizeCategory(rec.category)}
                       </span>
                       <h3 className="font-headline-md text-headline-md text-white font-bold leading-tight mt-0.5">
-                        {rec.name}
+                        {localizeDestinationName(rec.name)}
                       </h3>
                     </div>
                     <div className="text-right">
                       <span className="font-label-sm text-[10px] text-white/70 block uppercase">{t('recommendations.estDaily')}</span>
-                      <span className="font-headline-sm text-headline-sm text-white font-bold">₹{dailyCost}{t('common.perDay')}</span>
+                      <span className="font-headline-sm text-headline-sm text-white font-bold">{formatPricePerDay(dailyCost)}</span>
                     </div>
                   </div>
                 </div>
@@ -597,7 +602,7 @@ export default function Recommendations() {
                   {/* Verified Address */}
                   <div className="flex items-center gap-1.5 text-on-surface-variant text-[12px] font-medium">
                     <span className="material-symbols-outlined text-[15px] text-primary shrink-0">location_on</span>
-                    <span className="truncate">{rec.address || (rec.district ? `${rec.name}, ${rec.district}, West Bengal` : 'West Bengal')}</span>
+                    <span className="truncate">{rec.address || (rec.district ? `${localizeDestinationName(rec.name)}, ${localizeRegion(rec.district)}, ${t('regions.westBengal')}` : t('regions.westBengal'))}</span>
                   </div>
 
                   {/* Underrated & Crowd Metrics */}

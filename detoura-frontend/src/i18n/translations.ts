@@ -1,409 +1,22 @@
 export type Language = 'en' | 'hi' | 'bn';
 
 export interface Translations {
-  nav: {
-    explore: string;
-    travelDna: string;
-    discover: string;
-    profile: string;
-  };
-  common: {
-    appName: string;
-    loading: string;
-    error: string;
-    retry: string;
-    back: string;
-    save: string;
-    saved: string;
-    remove: string;
-    cancel: string;
-    close: string;
-    search: string;
-    viewDetails: string;
-    viewItinerary: string;
-    days: string;
-    day: string;
-    perDay: string;
-    km: string;
-    kmAway: string;
-    distance: string;
-    match: string;
-    all: string;
-    verified: string;
-    firestoreSynced: string;
-    signOut: string;
-    signIn: string;
-    signUp: string;
-    share: string;
-    getDirections: string;
-    startNavigation: string;
-    verifiedAddress: string;
-    addressUnavailable: string;
-    language: string;
-    english: string;
-    hindi: string;
-    bengali: string;
-    passport: string;
-    google: string;
-    spot: string;
-    gem: string;
-    guest: string;
-    traveler: string;
-    selected: string;
-    failedToRemoveTrip: string;
-    failedToUpdateTrip: string;
-  };
-  auth: {
-    authTitle: string;
-    welcomeBack: string;
-    welcomeSubtitle: string;
-    joinDetoura: string;
-    createPassport: string;
-    createPassportSubtitle: string;
-    emailLabel: string;
-    emailPlaceholder: string;
-    passwordLabel: string;
-    passwordPlaceholder: string;
-    confirmPasswordLabel: string;
-    confirmPasswordPlaceholder: string;
-    fullNameLabel: string;
-    fullNamePlaceholder: string;
-    optional: string;
-    continueWithGoogle: string;
-    connectingWithGoogle: string;
-    orWithEmail: string;
-    signInButton: string;
-    signingIn: string;
-    signUpButton: string;
-    creatingAccount: string;
-    newToDetoura: string;
-    alreadyHaveAccount: string;
-    createAccountLink: string;
-    signInLink: string;
-    exploreAsGuest: string;
-    errorEnterEmail: string;
-    errorEnterPassword: string;
-    errorPasswordShort: string;
-    errorPasswordsMismatch: string;
-    showPassword: string;
-    hidePassword: string;
-  };
-  explore: {
-    aiEngineReady: string;
-    heroHeadline: string;
-    heroSubhead: string;
-    startDnaQuiz: string;
-    browseAllSpots: string;
-    offbeatHighlights: string;
-    offbeatSubhead: string;
-    curatedDistricts: string;
-    districtsSubhead: string;
-    mapTitle: string;
-    mapSubtitle: string;
-    liveGpsTitle: string;
-    viewDetour: string;
-    featuredDetour: string;
-    activeTravelers: string;
-    destinationsIndexed: string;
-    aiPrecision: string;
-    goodMorning: string;
-    discoverBengal: string;
-    whereDetourToday: string;
-    curatedRegionalIntel: string;
-    topographicNavigator: string;
-    activeSelection: string;
-    viewPin: string;
-    planTrip: string;
-    noDestMatchCategory: string;
-    resetFilter: string;
-    tuneDna: string;
-    hiddenGemsTitle: string;
-    realData: string;
-    pinOnMap: string;
-    customBengalDetour: string;
-    got3Days: string;
-    letAiCalibrate: string;
-    craftTrip: string;
-    categoryAll: string;
-    categoryHills: string;
-    categoryWild: string;
-    categoryCoastal: string;
-    categoryHeritage: string;
-    authenticDestinationIn: string;
-    tranquilityQuotient: string;
-  };
-  travelDna: {
-    stepIndicator: string;
-    stepTitle: string;
-    pageHeading: string;
-    pageSubheading: string;
-    nature: string;
-    natureDesc: string;
-    serenity: string;
-    serenityDesc: string;
-    culture: string;
-    cultureDesc: string;
-    adventure: string;
-    adventureDesc: string;
-    seasonTitle: string;
-    seasonSubtitle: string;
-    currentSeason: string;
-    customSeason: string;
-    selectMonth: string;
-    durationTitle: string;
-    durationSubtitle: string;
-    daysCount: string;
-    placeTypesTitle: string;
-    placeTypesSubtitle: string;
-    budgetTitle: string;
-    budgetSubtitle: string;
-    budgetPerDay: string;
-    tierBudget: string;
-    tierMid: string;
-    tierComfort: string;
-    tierAll: string;
-    generateCta: string;
-    generatingCta: string;
-    guestNotice: string;
-    guestAction: string;
-    affinityTitle: string;
-    affinitySubtitle: string;
-    liveWeights: string;
-    selectedCount: string;
-    whenToTravel: string;
-    whenSubtitle: string;
-    runtimeSystemMonth: string;
-    runtimeMonthDesc: string;
-    monthNum: string;
-    dailyCeiling: string;
-    upTo: string;
-    tier1Label: string;
-    tier1Desc: string;
-    tier2Label: string;
-    tier2Desc: string;
-    tier3Label: string;
-    tier3Desc: string;
-    durationPlanTitle: string;
-    durationPlanSubtitle: string;
-    durationWeekend: string;
-    durationClassic: string;
-    durationExtended: string;
-    durationComplete: string;
-    gemmaLlmNotice: string;
-    multiCriteriaFooter: string;
-    errorNoticeTitle: string;
-    exploreOffline: string;
-  };
-  recommendations: {
-    heading: string;
-    subheading: string;
-    matchedCount: string;
-    filterAll: string;
-    filterBudget: string;
-    filterDistance: string;
-    filterNearMe: string;
-    filterMountains: string;
-    filterForest: string;
-    filterHeritage: string;
-    ssiBadge: string;
-    cpiBadge: string;
-    gemBadge: string;
-    matchBadge: string;
-    emptyTitle: string;
-    emptySubtitle: string;
-    emptyAction: string;
-    lowCrowds: string;
-    moderateCrowds: string;
-    highCrowds: string;
-    idealSeason: string;
-    offSeason: string;
-    saveTripTooltip: string;
-    removeTripTooltip: string;
-    viewDetailsCta: string;
-    modelEngineBadge: string;
-    currentSeasonBadge: string;
-    customSeasonBadge: string;
-    gemmaTopMatch: string;
-    modelTopMatch: string;
-    curatedPlanBadge: string;
-    enableLocationDistance: string;
-    gemmaReasoningTitle: string;
-    modelReasoningTitle: string;
-    viewCuratedPlan: string;
-    locatePin: string;
-    noBudgetMatchTitle: string;
-    noBudgetMatchSubtitle: string;
-    resetBudgetFilter: string;
-    locationDeniedMsg: string;
-    locationDetectingMsg: string;
-    locationPromptMsg: string;
-    enableLocationBtn: string;
-    rankPrefix: string;
-    estDaily: string;
-    tranquilityScore: string;
-    offbeatLabel: string;
-    crowdPressureLabel: string;
-    lowDensity: string;
-    viewPinOnMap: string;
-    noRecsYet: string;
-    tuneDnaPrompt: string;
-    buildTravelDnaBtn: string;
-  };
-  destinationDetail: {
-    backBtn: string;
-    saveTrip: string;
-    savedTrip: string;
-    shareTrip: string;
-    directionsBtn: string;
-    openGoogleMaps: string;
-    synthesizingTitle: string;
-    synthesizingDesc: string;
-    notFoundTitle: string;
-    notFoundDesc: string;
-    overviewHeading: string;
-    highlightsHeading: string;
-    itineraryHeading: string;
-    aiIntelligenceHeading: string;
-    localIntelHeading: string;
-    practicalInfoHeading: string;
-    morningSlot: string;
-    afternoonSlot: string;
-    eveningSlot: string;
-    dayPrefix: string;
-    crowdPressure: string;
-    seasonalFitness: string;
-    underratedScore: string;
-    estimatedCost: string;
-    liveDistance: string;
-    verifiedLocation: string;
-    recommendedDuration: string;
-    activitiesTitle: string;
-    reSynthesize: string;
-    destinationIntelligence: string;
-    contractVerified: string;
-    matchScore: string;
-    seasonSsi: string;
-    underrated: string;
-    budgetTier: string;
-    tierPrefix: string;
-    curatedItineraryTitle: string;
-    synthesizedByGemma: string;
-    allDays: string;
-    timeSlotsBadge: string;
-    generateCustomItinerary: string;
-    gemmaDescription: string;
-    synthesizePlanCta: string;
-    synthesizingWithGemma: string;
-    highlights: string;
-    curatedActivities: string;
-    district: string;
-    vibe: string;
-    comfort: string;
-    verifiedAddressNav: string;
-    verifiedGeodata: string;
-    address: string;
-    coordinates: string;
-    coordsUnavailable: string;
-    distanceFromLoc: string;
-    fromYourLocation: string;
-    fromOrigin: string;
-    liveDistUnavailable: string;
-    detectingLocation: string;
-    locationDenied: string;
-    locationNotEnabled: string;
-    enableLocation: string;
-    detectingBtn: string;
-    howToReach: string;
-    openDirectionsSub: string;
-    viewPin: string;
-    save: string;
-    saved: string;
-    back: string;
-    activities: string;
-    morning: string;
-    afternoon: string;
-    evening: string;
-    dnaMatch: string;
-    duration: string;
-    realBudget: string;
-    tranquility: string;
-    offbeat: string;
-    crowdIndex: string;
-    aiSynthesisTitle: string;
-    viewRecommendationsBtn: string;
-    directionsUnavailable: string;
-    enableLocationForDirections: string;
-    budgetFriendly: string;
-    moderateComfort: string;
-    premiumHeritage: string;
-    morningFallback: string;
-    afternoonFallback: string;
-    eveningFallback: string;
-    directionsDispatch: string;
-  };
-  profile: {
-    heading: string;
-    activeSession: string;
-    savedTripsCount: string;
-    kmMapped: string;
-    aiAlignment: string;
-    travelDnaSummary: string;
-    editDna: string;
-    mySavedTrips: string;
-    loadingTrips: string;
-    noTripsTitle: string;
-    noTripsDesc: string;
-    discoverDetours: string;
-    removeSaved: string;
-    viewItinerary: string;
-    languageSettings: string;
-    languageSubtitle: string;
-    verifiedTraveler: string;
-    nature: string;
-    serenity: string;
-    culture: string;
-    adventure: string;
-  };
-  budgetFilter: {
-    title: string;
-    spotsCount: string;
-    reset: string;
-    maxDailyCeiling: string;
-    allBudgets: string;
-    perDay: string;
-    presetLabel: string;
-    tierActive: string;
-    allTiers: string;
-    tier1: string;
-    tier2: string;
-    tier3: string;
-  };
-  map: {
-    zoomIn: string;
-    zoomOut: string;
-    recenter: string;
-    selected: string;
-    closeDetails: string;
-    regionalDestination: string;
-  };
-  chatbot: {
-    floatingButton: string;
-    title: string;
-    subtitle: string;
-    currentDestination: string;
-    inputPlaceholder: string;
-    send: string;
-    close: string;
-    thinking: string;
-    quickPromptsTitle: string;
-    quickPromptActivities: string;
-    quickPromptItinerary: string;
-    quickPromptDistance: string;
-    welcomeMessage: string;
-    disclaimer: string;
-  };
+  nav: Record<string, string>;
+  common: Record<string, string>;
+  auth: Record<string, string>;
+  explore: Record<string, string>;
+  travelDna: Record<string, string>;
+  recommendations: Record<string, string>;
+  destinationDetail: Record<string, string>;
+  profile: Record<string, string>;
+  budgetFilter: Record<string, string>;
+  map: Record<string, string>;
+  chatbot: Record<string, string>;
   placeTypes: Record<string, string>;
   months: Record<number, string>;
+  categories: Record<string, string>;
+  regions: Record<string, string>;
+  destinations: Record<string, string>;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -430,7 +43,7 @@ export const translations: Record<Language, Translations> = {
     "viewItinerary": "View Itinerary",
     "days": "Days",
     "day": "Day",
-    "perDay": "day",
+    "perDay": " / day",
     "km": "km",
     "kmAway": "km away",
     "distance": "Distance",
@@ -654,7 +267,8 @@ export const translations: Record<Language, Translations> = {
     "viewPinOnMap": "View Pin on Map",
     "noRecsYet": "No recommendations yet",
     "tuneDnaPrompt": "Tune your Travel DNA affinity sliders to generate bespoke West Bengal detours.",
-    "buildTravelDnaBtn": "Build Travel DNA"
+    "buildTravelDnaBtn": "Build Travel DNA",
+    "tierLabel": "Tier"
   },
   "destinationDetail": {
     "backBtn": "Back",
@@ -791,7 +405,8 @@ export const translations: Record<Language, Translations> = {
     "recenter": "Recenter West Bengal",
     "selected": "Selected",
     "closeDetails": "Close details",
-    "regionalDestination": "Regional Destination"
+    "regionalDestination": "Regional Destination",
+    "westBengalOnly": "West Bengal Only"
   },
   "chatbot": {
     "floatingButton": "✦ Ask Detoura",
@@ -836,6 +451,86 @@ export const translations: Record<Language, Translations> = {
     "10": "October",
     "11": "November",
     "12": "December"
+  },
+  "categories": {
+    "heritage": "Heritage",
+    "hillStation": "Hill Station",
+    "wildlife": "Wildlife",
+    "coastal": "Coastal",
+    "offbeat": "Offbeat",
+    "culture": "Culture",
+    "adventure": "Adventure",
+    "serenity": "Serenity",
+    "nature": "Nature",
+    "spot": "Spot",
+    "gem": "Gem",
+    "temples": "Temples",
+    "forest": "Forest",
+    "teaGarden": "Tea Garden",
+    "river": "River",
+    "trek": "Trek",
+    "regionalDiscovery": "Regional Discovery"
+  },
+  "regions": {
+    "westBengal": "West Bengal",
+    "alipurduar": "Alipurduar",
+    "bankura": "Bankura",
+    "birbhum": "Birbhum",
+    "coochBehar": "Cooch Behar",
+    "dakshinDinajpur": "Dakshin Dinajpur",
+    "darjeeling": "Darjeeling",
+    "hooghly": "Hooghly",
+    "howrah": "Howrah",
+    "jalpaiguri": "Jalpaiguri",
+    "jhargram": "Jhargram",
+    "kalimpong": "Kalimpong",
+    "kolkata": "Kolkata",
+    "malda": "Malda",
+    "murshidabad": "Murshidabad",
+    "nadia": "Nadia",
+    "north24Parganas": "North 24 Parganas",
+    "paschimBardhaman": "Paschim Bardhaman",
+    "paschimMedinipur": "Paschim Medinipur",
+    "purbaBardhaman": "Purba Bardhaman",
+    "purbaMedinipur": "Purba Medinipur",
+    "purulia": "Purulia",
+    "south24Parganas": "South 24 Parganas",
+    "uttarDinajpur": "Uttar Dinajpur"
+  },
+  "destinations": {
+    "Lolegaon Heritage Garden": "Lolegaon Heritage Garden",
+    "Sillery Gaon": "Sillery Gaon",
+    "Lepchajagat": "Lepchajagat",
+    "Takdah": "Takdah",
+    "Lamahatta": "Lamahatta",
+    "Rishop": "Rishop",
+    "Tinchuley": "Tinchuley",
+    "Chatakpur": "Chatakpur",
+    "Lava": "Lava",
+    "Lolegaon": "Lolegaon",
+    "Samsing": "Samsing",
+    "Suntalekhola": "Suntalekhola",
+    "Jhalong": "Jhalong",
+    "Bindu": "Bindu",
+    "Bishnupur": "Bishnupur",
+    "Mukutmanipur": "Mukutmanipur",
+    "Susunia Hill": "Susunia Hill",
+    "Biharinath": "Biharinath",
+    "Ayodhya Hills": "Ayodhya Hills",
+    "Muruguma": "Muruguma",
+    "Baranti": "Baranti",
+    "Garhbeta": "Garhbeta",
+    "Jhargram Palace": "Jhargram Palace",
+    "Shantiniketan": "Shantiniketan",
+    "Tarapith": "Tarapith",
+    "Mayapur": "Mayapur",
+    "Hazarduari Palace": "Hazarduari Palace",
+    "Henry's Island": "Henry's Island",
+    "Bakkhali": "Bakkhali",
+    "Mousuni Island": "Mousuni Island",
+    "Tajpur": "Tajpur",
+    "Mandarmani": "Mandarmani",
+    "Digha": "Digha"
   }
 },
   hi: {
@@ -861,7 +556,7 @@ export const translations: Record<Language, Translations> = {
     "viewItinerary": "यात्रा कार्यक्रम देखें",
     "days": "दिन",
     "day": "दिन",
-    "perDay": "प्रति दिन",
+    "perDay": " / दिन",
     "km": "किमी",
     "kmAway": "किमी दूर",
     "distance": "दूरी",
@@ -1085,7 +780,8 @@ export const translations: Record<Language, Translations> = {
     "viewPinOnMap": "मानचित्र पर पिन देखें",
     "noRecsYet": "अभी तक कोई सिफारिश नहीं",
     "tuneDnaPrompt": "पश्चिम बंगाल की अनूठी यात्राओं के लिए अपना ट्रैवल डीएनए सेट करें।",
-    "buildTravelDnaBtn": "ट्रैवल डीएनए बनाएं"
+    "buildTravelDnaBtn": "ट्रैवल डीएनए बनाएं",
+    "tierLabel": "टियर"
   },
   "destinationDetail": {
     "backBtn": "पीछे जाएं",
@@ -1222,7 +918,8 @@ export const translations: Record<Language, Translations> = {
     "recenter": "पश्चिम बंगाल पुनः केंद्रित करें",
     "selected": "चयनित",
     "closeDetails": "विवरण बंद करें",
-    "regionalDestination": "क्षेत्रीय गंतव्य"
+    "regionalDestination": "क्षेत्रीय गंतव्य",
+    "westBengalOnly": "केवल पश्चिम बंगाल"
   },
   "chatbot": {
     "floatingButton": "✦ डेटौरा से पूछें",
@@ -1267,6 +964,86 @@ export const translations: Record<Language, Translations> = {
     "10": "अक्टूबर",
     "11": "नवंबर",
     "12": "दिसंबर"
+  },
+  "categories": {
+    "heritage": "धरोहर",
+    "hillStation": "पहाड़ी स्थल",
+    "wildlife": "वन्यजीव",
+    "coastal": "तटीय",
+    "offbeat": "ऑफबीट",
+    "culture": "संस्कृति",
+    "adventure": "साहसिक",
+    "serenity": "शांति",
+    "nature": "प्रकृति",
+    "spot": "स्थल",
+    "gem": "अनोखा स्थल",
+    "temples": "मंदिर",
+    "forest": "जंगल",
+    "teaGarden": "चाय बागान",
+    "river": "नदी",
+    "trek": "ट्रेकिंग",
+    "regionalDiscovery": "क्षेत्रीय खोज"
+  },
+  "regions": {
+    "westBengal": "पश्चिम बंगाल",
+    "alipurduar": "अलीपुरद्वार",
+    "bankura": "बांकुड़ा",
+    "birbhum": "बीरभूम",
+    "coochBehar": "कूचबिहार",
+    "dakshinDinajpur": "दक्षिण दिनाजपुर",
+    "darjeeling": "दार्जिलिंग",
+    "hooghly": "हुगली",
+    "howrah": "हावड़ा",
+    "jalpaiguri": "जलपाईगुड़ी",
+    "jhargram": "झाड़ग्राम",
+    "kalimpong": "कालिम्पोंग",
+    "kolkata": "कोलकाता",
+    "malda": "मालदा",
+    "murshidabad": "मुर्शिदाबाद",
+    "nadia": "नदिया",
+    "north24Parganas": "उत्तर 24 परगना",
+    "paschimBardhaman": "पश्चिम बर्धमान",
+    "paschimMedinipur": "पश्चिम मेदिनीपुर",
+    "purbaBardhaman": "पूर्व बर्धमान",
+    "purbaMedinipur": "पूर्व मेदिनीपुर",
+    "purulia": "पुरुलिया",
+    "south24Parganas": "दक्षिण 24 परगना",
+    "uttarDinajpur": "उत्तर दिनाजपुर"
+  },
+  "destinations": {
+    "Lolegaon Heritage Garden": "लोलेगांव हेरिटेज गार्डन",
+    "Sillery Gaon": "सिल्लेरी गांव",
+    "Lepchajagat": "लेपचाजगत",
+    "Takdah": "तकदाह",
+    "Lamahatta": "लामाहाट्टा",
+    "Rishop": "रिशप",
+    "Tinchuley": "तिनचुले",
+    "Chatakpur": "चटकपुर",
+    "Lava": "लावा",
+    "Lolegaon": "लोलेगांव",
+    "Samsing": "समसिंग",
+    "Suntalekhola": "सुंतलेखोला",
+    "Jhalong": "झालोंग",
+    "Bindu": "बिंदु",
+    "Bishnupur": "विष्णुपुर",
+    "Mukutmanipur": "मुकुटमणिपुर",
+    "Susunia Hill": "सुसुनिया पहाड़ी",
+    "Biharinath": "बिहारीनाथ",
+    "Ayodhya Hills": "अयोध्या पहाड़ियां",
+    "Muruguma": "मुरुगुमा",
+    "Baranti": "बरांती",
+    "Garhbeta": "गढ़बेटा",
+    "Jhargram Palace": "झाड़ग्राम पैलेस",
+    "Shantiniketan": "शांतिनिकेतन",
+    "Tarapith": "तारापीठ",
+    "Mayapur": "मायापुर",
+    "Hazarduari Palace": "हज़ारदुआरी पैलेस",
+    "Henry's Island": "हेनरी द्वीप",
+    "Bakkhali": "बक्खाली",
+    "Mousuni Island": "मौसुनी द्वीप",
+    "Tajpur": "ताजपुर",
+    "Mandarmani": "मंदारमणि",
+    "Digha": "दीघा"
   }
 },
   bn: {
@@ -1292,7 +1069,7 @@ export const translations: Record<Language, Translations> = {
     "viewItinerary": "ভ্রমণসূচি দেখুন",
     "days": "দিন",
     "day": "দিন",
-    "perDay": "প্রতি দিন",
+    "perDay": " / দিন",
     "km": "কিমি",
     "kmAway": "কিমি দূরে",
     "distance": "দূরত্ব",
@@ -1516,7 +1293,8 @@ export const translations: Record<Language, Translations> = {
     "viewPinOnMap": "ম্যাপে পিন দেখুন",
     "noRecsYet": "এখনও কোনো সুপারিশ নেই",
     "tuneDnaPrompt": "পশ্চিমবঙ্গের অফবিট ভ্রমণের পরামর্শ পেতে আপনার ট্রাভেল ডিএনএ সেট করুন।",
-    "buildTravelDnaBtn": "ট্রাভেল ডিএনএ তৈরি করুন"
+    "buildTravelDnaBtn": "ট্রাভেল ডিএনএ তৈরি করুন",
+    "tierLabel": "টিয়ার"
   },
   "destinationDetail": {
     "backBtn": "ফিরে যান",
@@ -1653,7 +1431,8 @@ export const translations: Record<Language, Translations> = {
     "recenter": "পশ্চিমবঙ্গ পুনরায় কেন্দ্রবিন্দু করুন",
     "selected": "নির্বাচিত",
     "closeDetails": "বিবরণ বন্ধ করুন",
-    "regionalDestination": "আঞ্চলিক গন্তব্য"
+    "regionalDestination": "আঞ্চলিক গন্তব্য",
+    "westBengalOnly": "শুধুমাত্র পশ্চিমবঙ্গ"
   },
   "chatbot": {
     "floatingButton": "✦ ডিটৌরাকে জিজ্ঞাসা করুন",
@@ -1698,6 +1477,86 @@ export const translations: Record<Language, Translations> = {
     "10": "অক্টোবর",
     "11": "নভেম্বর",
     "12": "ডিসেম্বর"
+  },
+  "categories": {
+    "heritage": "ঐতিহ্য",
+    "hillStation": "শৈলশহর",
+    "wildlife": "বন্যপ্রাণী",
+    "coastal": "উপকূলীয়",
+    "offbeat": "অফবিট",
+    "culture": "সংস্কৃতি",
+    "adventure": "অ্যাডভেঞ্চার",
+    "serenity": "প্রশান্তি",
+    "nature": "প্রকৃতি",
+    "spot": "স্পট",
+    "gem": "লুকানো রত্ন",
+    "temples": "মন্দির",
+    "forest": "অরণ্য",
+    "teaGarden": "চা বাগান",
+    "river": "নদী",
+    "trek": "ট্রেকিং",
+    "regionalDiscovery": "আঞ্চলিক অন্বেষণ"
+  },
+  "regions": {
+    "westBengal": "পশ্চিমবঙ্গ",
+    "alipurduar": "আলিপুরদুয়ার",
+    "bankura": "বাঁকুড়া",
+    "birbhum": "বীরভূম",
+    "coochBehar": "কোচবিহার",
+    "dakshinDinajpur": "দক্ষিণ দিনাজপুর",
+    "darjeeling": "দার্জিলিং",
+    "hooghly": "হুগলি",
+    "howrah": "হাওড়া",
+    "jalpaiguri": "জলপাইগুড়ি",
+    "jhargram": "ঝাড়গ্রাম",
+    "kalimpong": "কালিম্পং",
+    "kolkata": "কলকাতা",
+    "malda": "মালদা",
+    "murshidabad": "মুর্শিদাবাদ",
+    "nadia": "নদিয়া",
+    "north24Parganas": "উত্তর ২৪ পরগনা",
+    "paschimBardhaman": "পশ্চিম বর্ধমান",
+    "paschimMedinipur": "পশ্চিম মেদিনীপুর",
+    "purbaBardhaman": "পূর্ব বর্ধমান",
+    "purbaMedinipur": "পূর্ব মেদিনীপুর",
+    "purulia": "পুরুলিয়া",
+    "south24Parganas": "দক্ষিণ ২৪ পরগনা",
+    "uttarDinajpur": "উত্তর দিনাজপুর"
+  },
+  "destinations": {
+    "Lolegaon Heritage Garden": "লোলেগাঁও হেরিটেজ গার্ডেন",
+    "Sillery Gaon": "সিলারি গাঁও",
+    "Lepchajagat": "লেপচাজগৎ",
+    "Takdah": "তকদা",
+    "Lamahatta": "লামাহাট্টা",
+    "Rishop": "রিশপ",
+    "Tinchuley": "তিনচুলে",
+    "Chatakpur": "চটকপুর",
+    "Lava": "লাভা",
+    "Lolegaon": "লোলেগাঁও",
+    "Samsing": "সামসিং",
+    "Suntalekhola": "সুন্তালেখোলা",
+    "Jhalong": "ঝালং",
+    "Bindu": "বিন্দু",
+    "Bishnupur": "বিষ্ণুপুর",
+    "Mukutmanipur": "মুকুটমণিপুর",
+    "Susunia Hill": "শুশুনিয়া পাহাড়",
+    "Biharinath": "বিহারীনাথ",
+    "Ayodhya Hills": "অযোধ্যা পাহাড়",
+    "Muruguma": "মুরুগুমা",
+    "Baranti": "বড়ন্তি",
+    "Garhbeta": "গড়বেতা",
+    "Jhargram Palace": "ঝাড়গ্রাম রাজবাড়ি",
+    "Shantiniketan": "শান্তিনিকেতন",
+    "Tarapith": "তারাপীঠ",
+    "Mayapur": "মায়াপুর",
+    "Hazarduari Palace": "হাজারদুয়ারি প্রাসাদ",
+    "Henry's Island": "হেনরি আইল্যান্ড",
+    "Bakkhali": "বকখালি",
+    "Mousuni Island": "মৌসুনি দ্বীপ",
+    "Tajpur": "তাজপুর",
+    "Mandarmani": "মন্দারমণি",
+    "Digha": "দিঘা"
   }
 }
 };
@@ -1725,4 +1584,120 @@ export function translate(lang: Language, keyPath: string, fallback?: string): s
     }
   }
   return typeof current === 'string' ? current : fallback || keyPath;
+}
+
+/**
+ * Normalizes and localizes destination categories (e.g., 'Heritage' -> 'ঐতিহ্য' in Bengali, 'धरोहर' in Hindi).
+ */
+export function localizeCategory(category: string | undefined, lang: Language): string {
+  if (!category || !category.trim()) {
+    return translate(lang, 'common.spot');
+  }
+  const normalized = category.trim().toLowerCase();
+  if (normalized.includes('heritage')) return translate(lang, 'categories.heritage');
+  if (normalized.includes('hill') || normalized.includes('mountain') || normalized.includes('ridge')) return translate(lang, 'categories.hillStation');
+  if (normalized.includes('wild') || normalized.includes('animal') || normalized.includes('fauna')) return translate(lang, 'categories.wildlife');
+  if (normalized.includes('coast') || normalized.includes('beach') || normalized.includes('sea')) return translate(lang, 'categories.coastal');
+  if (normalized.includes('temple') || normalized.includes('spiritual')) return translate(lang, 'categories.temples');
+  if (normalized.includes('forest') || normalized.includes('jungle')) return translate(lang, 'categories.forest');
+  if (normalized.includes('tea')) return translate(lang, 'categories.teaGarden');
+  if (normalized.includes('river') || normalized.includes('lake') || normalized.includes('waterfall')) return translate(lang, 'categories.river');
+  if (normalized.includes('trek') || normalized.includes('hike')) return translate(lang, 'categories.trek');
+  if (normalized.includes('cultur')) return translate(lang, 'categories.culture');
+  if (normalized.includes('adventur')) return translate(lang, 'categories.adventure');
+  if (normalized.includes('seren') || normalized.includes('relax') || normalized.includes('peace')) return translate(lang, 'categories.serenity');
+  if (normalized.includes('natur')) return translate(lang, 'categories.nature');
+  if (normalized.includes('regional')) return translate(lang, 'categories.regionalDiscovery');
+  if (normalized.includes('offbeat')) return translate(lang, 'categories.offbeat');
+  if (normalized.includes('gem')) return translate(lang, 'categories.gem');
+  if (normalized.includes('spot')) return translate(lang, 'categories.spot');
+
+  const dict = translations[lang]?.categories || translations.en.categories;
+  if (dict && dict[normalized]) {
+    return dict[normalized];
+  }
+  return category;
+}
+
+/**
+ * Normalizes and localizes West Bengal districts & state regions.
+ */
+export function localizeRegion(region: string | undefined, lang: Language): string {
+  if (!region || !region.trim()) {
+    return translate(lang, 'regions.westBengal');
+  }
+  const clean = region.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!clean || clean.includes('westbengal')) return translate(lang, 'regions.westBengal');
+  if (clean.includes('alipurduar')) return translate(lang, 'regions.alipurduar');
+  if (clean.includes('bankura')) return translate(lang, 'regions.bankura');
+  if (clean.includes('birbhum')) return translate(lang, 'regions.birbhum');
+  if (clean.includes('coochbehar') || clean.includes('kochbihar')) return translate(lang, 'regions.coochBehar');
+  if (clean.includes('dakshindinajpur') || clean.includes('southdinajpur')) return translate(lang, 'regions.dakshinDinajpur');
+  if (clean.includes('darjeeling')) return translate(lang, 'regions.darjeeling');
+  if (clean.includes('hooghly') || clean.includes('hugli')) return translate(lang, 'regions.hooghly');
+  if (clean.includes('howrah') || clean.includes('haora')) return translate(lang, 'regions.howrah');
+  if (clean.includes('jalpaiguri')) return translate(lang, 'regions.jalpaiguri');
+  if (clean.includes('jhargram')) return translate(lang, 'regions.jhargram');
+  if (clean.includes('kalimpong')) return translate(lang, 'regions.kalimpong');
+  if (clean.includes('kolkata') || clean.includes('calcutta')) return translate(lang, 'regions.kolkata');
+  if (clean.includes('malda') || clean.includes('maldah')) return translate(lang, 'regions.malda');
+  if (clean.includes('murshidabad')) return translate(lang, 'regions.murshidabad');
+  if (clean.includes('nadia')) return translate(lang, 'regions.nadia');
+  if (clean.includes('north24parganas') || clean.includes('n24parganas') || clean.includes('uttar24parganas')) return translate(lang, 'regions.north24Parganas');
+  if (clean.includes('paschimbardhaman') || clean.includes('westbardhaman') || clean.includes('westburdwan')) return translate(lang, 'regions.paschimBardhaman');
+  if (clean.includes('paschimmedinipur') || clean.includes('westmedinipur') || clean.includes('westmidnapore')) return translate(lang, 'regions.paschimMedinipur');
+  if (clean.includes('purbabardhaman') || clean.includes('eastbardhaman') || clean.includes('eastburdwan')) return translate(lang, 'regions.purbaBardhaman');
+  if (clean.includes('purbamedinipur') || clean.includes('eastmedinipur') || clean.includes('eastmidnapore')) return translate(lang, 'regions.purbaMedinipur');
+  if (clean.includes('purulia')) return translate(lang, 'regions.purulia');
+  if (clean.includes('south24parganas') || clean.includes('s24parganas') || clean.includes('dakshin24parganas')) return translate(lang, 'regions.south24Parganas');
+  if (clean.includes('uttardinajpur') || clean.includes('northdinajpur')) return translate(lang, 'regions.uttarDinajpur');
+
+  return region;
+}
+
+/**
+ * Returns established localized names for destinations if available, while strictly preserving
+ * official destination names for others (e.g. 'Lolegaon Heritage Garden' -> 'লোলেগাঁও হেরিটেজ গার্ডেন').
+ * Does not translate technical IDs or database keys.
+ */
+export function localizeDestinationName(name: string | undefined, lang: Language): string {
+  if (!name || !name.trim()) return '';
+  const trimmed = name.trim();
+  const destMap = translations[lang]?.destinations;
+  if (destMap && destMap[trimmed]) {
+    return destMap[trimmed];
+  }
+  if (destMap) {
+    const lower = trimmed.toLowerCase();
+    for (const [k, v] of Object.entries(destMap)) {
+      if (k.toLowerCase() === lower) {
+        return v;
+      }
+    }
+  }
+  return trimmed;
+}
+
+/**
+ * Formats daily price consistently across languages (e.g. ₹2,500 / day, ₹2,500 / दिन, ₹2,500 / দিন).
+ */
+export function formatPricePerDay(amount: number | string | undefined, lang: Language): string {
+  const num = Math.round(Number(amount || 0));
+  const formatted = num.toLocaleString('en-IN');
+  const perDay = translate(lang, 'common.perDay');
+  return `₹${formatted}${perDay}`;
+}
+
+/**
+ * Formats duration consistently across languages (e.g. 2 Days, 2 दिन, 2 দিন).
+ */
+export function formatDuration(days: number | string | undefined, lang: Language): string {
+  const d = Number(days || 1);
+  if (lang === 'bn') {
+    return `${d} দিন`;
+  }
+  if (lang === 'hi') {
+    return `${d} दिन`;
+  }
+  return `${d} ${d === 1 ? 'Day' : 'Days'}`;
 }

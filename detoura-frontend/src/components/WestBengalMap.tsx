@@ -70,7 +70,13 @@ export default function WestBengalMap({
   className = '',
   height = '360px'
 }: WestBengalMapProps) {
-  const { t } = useTranslation();
+  const {
+    t,
+    localizeCategory,
+    localizeRegion,
+    localizeDestinationName,
+    formatPricePerDay
+  } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, { marker: L.Marker; dest: MapDestination }>>(new Map());
@@ -281,7 +287,7 @@ export default function WestBengalMap({
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-sm border border-outline-variant/30">
           <span className="w-2 h-2 rounded-full bg-secondary"></span>
           <span className="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">
-            West Bengal Only
+            {t('map.westBengalOnly')}
           </span>
         </div>
         <span className="font-label-sm text-[10px] bg-surface-container-lowest/80 backdrop-blur-xs px-2 py-0.5 rounded text-on-surface-variant font-mono shadow-xs">
@@ -304,20 +310,20 @@ export default function WestBengalMap({
           <div className="flex flex-col flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
               <span className="font-label-sm text-[10px] text-secondary font-bold uppercase tracking-wider truncate">
-                {activePopupDest.district || 'West Bengal'}
+                {localizeRegion(activePopupDest.district)}
               </span>
               <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-label-sm text-[9px] font-bold">
                 {t('map.selected')}
               </span>
             </div>
             <h4 className="font-headline-sm text-[14px] font-semibold text-on-surface truncate leading-tight mt-0.5">
-              {activePopupDest.name}
+              {localizeDestinationName(activePopupDest.name)}
             </h4>
             <div className="flex items-center justify-between text-on-surface-variant font-label-sm text-[11px] mt-1">
-              <span className="truncate">{activePopupDest.category || t('map.regionalDestination')}</span>
+              <span className="truncate">{localizeCategory(activePopupDest.category) || t('map.regionalDestination')}</span>
               {activePopupDest.estimated_daily_inr ? (
                 <span className="font-semibold text-secondary shrink-0">
-                  ₹{Math.round(activePopupDest.estimated_daily_inr)}/d
+                  {formatPricePerDay(activePopupDest.estimated_daily_inr)}
                 </span>
               ) : null}
             </div>
