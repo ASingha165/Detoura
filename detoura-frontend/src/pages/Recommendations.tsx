@@ -33,7 +33,9 @@ export default function Recommendations() {
     localizeRegion,
     localizeDestinationName,
     formatPricePerDay,
-    formatDuration
+    formatDuration,
+    formatAddress,
+    formatDestinationDescription
   } = useDetoura();
 
   const travelMonthName = useMemo(() => {
@@ -108,10 +110,24 @@ export default function Recommendations() {
   const activeOrFallbackIntelligence = useMemo(() => {
     if (!topRecommendation) return null;
     if (activeIntelligence && activeIntelligence.destination?.id === topRecommendation.destination_id) {
-      return activeIntelligence;
+      const exp = activeIntelligence.explanation || '';
+      const matchesLang =
+        (language === 'bn' && /[\u0980-\u09FF]/.test(exp)) ||
+        (language === 'hi' && /[\u0900-\u097F]/.test(exp)) ||
+        (language === 'en' && !/[\u0900-\u097F\u0980-\u09FF]/.test(exp));
+      if (matchesLang) {
+        return activeIntelligence;
+      }
     }
     if (topRecommendation.model3_payload && topRecommendation.model3_payload.destination?.id === topRecommendation.destination_id) {
-      return topRecommendation.model3_payload;
+      const pExp = topRecommendation.model3_payload.explanation || '';
+      const matchesLang =
+        (language === 'bn' && /[\u0980-\u09FF]/.test(pExp)) ||
+        (language === 'hi' && /[\u0900-\u097F]/.test(pExp)) ||
+        (language === 'en' && !/[\u0900-\u097F\u0980-\u09FF]/.test(pExp));
+      if (matchesLang) {
+        return topRecommendation.model3_payload;
+      }
     }
     return synthesizeOfflineIntelligence({
       destination_id: topRecommendation.destination_id,
@@ -335,7 +351,7 @@ export default function Recommendations() {
                   </h2>
                   <p className="text-body-sm text-on-surface-variant flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
-                    <span>{activeOrFallbackIntelligence.destination.address || `${localizeRegion(activeOrFallbackIntelligence.destination.district)}, ${t('regions.westBengal')}`}</span>
+                    <span>{formatAddress(activeOrFallbackIntelligence.destination.name, activeOrFallbackIntelligence.destination.district, activeOrFallbackIntelligence.destination.address)}</span>
                     <span>•</span>
                     <span className="font-semibold text-secondary">{localizeCategory(activeOrFallbackIntelligence.destination.category)}</span>
                     {userLocation && activeOrFallbackIntelligence.destination.latitude && activeOrFallbackIntelligence.destination.longitude ? (
@@ -602,7 +618,7 @@ export default function Recommendations() {
                   {/* Verified Address */}
                   <div className="flex items-center gap-1.5 text-on-surface-variant text-[12px] font-medium">
                     <span className="material-symbols-outlined text-[15px] text-primary shrink-0">location_on</span>
-                    <span className="truncate">{rec.address || (rec.district ? `${localizeDestinationName(rec.name)}, ${localizeRegion(rec.district)}, ${t('regions.westBengal')}` : t('regions.westBengal'))}</span>
+                    <span className="truncate">{formatAddress(rec.name, rec.district, rec.address)}</span>
                   </div>
 
                   {/* Underrated & Crowd Metrics */}
@@ -628,7 +644,7 @@ export default function Recommendations() {
                   </div>
 
                   <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2">
-                    {rec.description || `${rec.name} in ${rec.district || 'West Bengal'} offers a calibrated offbeat detour with high scenic value and low crowd congestion.`}
+                    {formatDestinationDescription(rec)}
                   </p>
 
                   <div className="pt-2 border-t border-surface-container flex items-center justify-between gap-2 flex-wrap">

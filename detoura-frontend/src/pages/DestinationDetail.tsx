@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDetoura } from '../DetouraContext';
 import { getDestinationImage } from '../services/imageService';
@@ -6,6 +6,7 @@ import DestinationImage from '../components/DestinationImage';
 import fallbackDestinations from '../data/destinations.json';
 import {
   getIntelligenceRecommendation,
+  synthesizeOfflineIntelligence,
   formatDistance,
   calculateHaversineDistance,
   getDirectionsUrl,
@@ -36,7 +37,9 @@ export default function DestinationDetail() {
     localizeRegion,
     localizeDestinationName,
     formatPricePerDay,
-    formatDuration
+    formatDuration,
+    formatAddress,
+    formatDestinationDescription
   } = useDetoura();
 
   const [heroImage, setHeroImage] = useState<string | null>(null);
@@ -55,7 +58,7 @@ export default function DestinationDetail() {
       category: found.category || 'Regional Discovery',
       latitude: found.latitude,
       longitude: found.longitude,
-      address: `${found.name}, ${found.district || 'West Bengal'}, West Bengal`,
+      address: formatAddress(found.name, found.district, undefined),
       state: 'West Bengal',
       budget_tier: found.budget_tier || 2,
       estimated_daily_inr: found.estimated_daily_inr || 2000,
@@ -68,7 +71,7 @@ export default function DestinationDetail() {
       recommended_duration_days: tripDays,
       budget_per_day: found.estimated_daily_inr || 2000,
       travel_style: found.category || 'Regional Discovery',
-      description: `DETOURA matched ${found.name} in ${found.district || 'West Bengal'} with your travel preferences.`,
+      description: formatDestinationDescription(found),
       highlights: [
         `District: ${found.district || 'West Bengal'}`,
         `Vibe: ${found.category || 'Offbeat'}`,
@@ -214,14 +217,49 @@ export default function DestinationDetail() {
     }
   }, [currentDest]);
 
-  // Determine itinerary and activities
-  const matchingIntelligence = (activeIntelligence?.destination?.id === currentDest?.destination_id)
-    ? activeIntelligence
-    : currentDest?.model3_payload;
+  // Determine itinerary and activities with active language verification
+  const matchingIntelligence = useMemo(() => {
+    const candidate = (activeIntelligence?.destination?.id === currentDest?.destination_id)
+      ? activeIntelligence
+      : currentDest?.model3_payload;
+    if (!candidate) return undefined;
+    const exp = candidate.explanation || '';
+    const matchesLang =
+      (language === 'bn' && /[\u0980-\u09FF]/.test(exp)) ||
+      (language === 'hi' && /[\u0900-\u097F]/.test(exp)) ||
+      (language === 'en' && !/[\u0900-\u097F\u0980-\u09FF]/.test(exp));
+    return matchesLang ? candidate : undefined;
+  }, [activeIntelligence, currentDest, language]);
 
-  const itinerary: Record<string, DayPlan> | undefined = currentDest?.itinerary || matchingIntelligence?.itinerary;
-  const activities: ActivityItem[] | undefined = currentDest?.activities || matchingIntelligence?.activities;
-  const aiExplanation = currentDest?.description || matchingIntelligence?.explanation;
+  // Guaranteed immediate localized fallback prevents flash of stale language during sync
+  const immediateFallbackIntel = useMemo(() => {
+    if (!currentDest) return null;
+    return synthesizeOfflineIntelligence({
+      destination_id: currentDest.destination_id,
+      trip_days: tripDays,
+      language: language,
+      user_lat: userLocation?.latitude,
+      user_lon: userLocation?.longitude,
+    });
+  }, [currentDest, tripDays, language, userLocation?.latitude, userLocation?.longitude]);
+
+  const itinerary: Record<string, DayPlan> | undefined =
+    matchingIntelligence?.itinerary ||
+    ((currentDest?.description && (
+      (language === 'bn' && /[\u0980-\u09FF]/.test(currentDest.description)) ||
+      (language === 'hi' && /[\u0900-\u097F]/.test(currentDest.description)) ||
+      (language === 'en' && !/[\u0900-\u097F\u0980-\u09FF]/.test(currentDest.description))
+    )) ? currentDest?.itinerary : undefined) ||
+    immediateFallbackIntel?.itinerary;
+
+  const activities: ActivityItem[] | undefined =
+    matchingIntelligence?.activities ||
+    immediateFallbackIntel?.activities;
+
+  const aiExplanation =
+    matchingIntelligence?.explanation ||
+    immediateFallbackIntel?.explanation ||
+    (currentDest ? formatDestinationDescription(currentDest) : '');
 
   // Synchronize destination narrative and itinerary with selected language (en, hi, bn)
   useEffect(() => {
@@ -518,7 +556,7 @@ export default function DestinationDetail() {
             <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col gap-1">
               <span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">{t('destinationDetail.address')}</span>
               <p className="font-body-md text-body-md text-on-surface font-semibold">
-                {currentDest.address || (currentDest.district ? `${localizeDestinationName(currentDest.name)}, ${localizeRegion(currentDest.district)}, ${t('regions.westBengal')}` : t('regions.westBengal'))}
+                {formatAddress(currentDest.name, currentDest.district, currentDest.address)}
               </p>
               {currentDest.latitude && currentDest.longitude ? (
                 <span className="font-label-sm text-[11px] text-on-surface-variant">
@@ -622,7 +660,7 @@ export default function DestinationDetail() {
               </span>
             </div>
             <p className="font-body-md text-body-md text-on-surface leading-relaxed">
-              {aiExplanation || `${localizeDestinationName(currentDest.name)} in ${localizeRegion(currentDest.district)} was calibrated using high cosine similarity to your travel weights, high offbeat index, and comfortable seasonal parameters.`}
+              {aiExplanation || formatDestinationDescription(currentDest)}
             </p>
           </div>
         </div>
@@ -674,7 +712,7 @@ export default function DestinationDetail() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1.5">
               <span className="material-symbols-outlined text-secondary text-[22px]">event_note</span>
-              <span>{tripDays}-{t('destinationDetail.curatedItineraryTitle')}</span>
+              <span>{formatDuration(tripDays)} • {t('destinationDetail.curatedItineraryTitle')}</span>
             </h3>
             {itinerary && (
               <span className="font-label-sm text-label-sm text-on-surface-variant">

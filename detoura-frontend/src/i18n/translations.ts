@@ -530,7 +530,37 @@ export const translations: Record<Language, Translations> = {
     "Mousuni Island": "Mousuni Island",
     "Tajpur": "Tajpur",
     "Mandarmani": "Mandarmani",
-    "Digha": "Digha"
+    "Digha": "Digha",
+    "Jaldapara": "Jaldapara",
+    "Buxa": "Buxa",
+    "Buxa Fort": "Buxa Fort",
+    "Jayanti": "Jayanti",
+    "Chilapata": "Chilapata",
+    "Gorumara": "Gorumara",
+    "Chapramari": "Chapramari",
+    "Lataguri": "Lataguri",
+    "Murti": "Murti",
+    "Mirik": "Mirik",
+    "Kurseong": "Kurseong",
+    "Sandakphu": "Sandakphu",
+    "Susunia": "Susunia",
+    "Joypur Forest": "Joypur Forest",
+    "Gongoni": "Gongoni",
+    "Jhargram": "Jhargram",
+    "Belpahari": "Belpahari",
+    "Santiniketan": "Santiniketan",
+    "Bakreshwar": "Bakreshwar",
+    "Kankalitala": "Kankalitala",
+    "Nabadwip": "Nabadwip",
+    "Murshidabad": "Murshidabad",
+    "Katra Mosque": "Katra Mosque",
+    "Sagar Island": "Sagar Island",
+    "Sundarbans": "Sundarbans",
+    "Shankarpur": "Shankarpur",
+    "Cooch Behar Palace": "Cooch Behar Palace",
+    "Rasikbil": "Rasikbil",
+    "Dooars": "Dooars",
+    "Duars": "Duars"
   }
 },
   hi: {
@@ -1043,7 +1073,37 @@ export const translations: Record<Language, Translations> = {
     "Mousuni Island": "मौसुनी द्वीप",
     "Tajpur": "ताजपुर",
     "Mandarmani": "मंदारमणि",
-    "Digha": "दीघा"
+    "Digha": "दीघा",
+    "Jaldapara": "जलदापारा",
+    "Buxa": "बक्सा",
+    "Buxa Fort": "बक्सा किला",
+    "Jayanti": "जयंती",
+    "Chilapata": "चिलापाता",
+    "Gorumara": "गोरुमारा",
+    "Chapramari": "चापड़ामारी",
+    "Lataguri": "लाटागुड़ी",
+    "Murti": "मूर्ति",
+    "Mirik": "मिरिक",
+    "Kurseong": "कुर्सियांग",
+    "Sandakphu": "सन्दकफू",
+    "Susunia": "सुसुनिया",
+    "Joypur Forest": "जयपुर वन",
+    "Gongoni": "गंगनी",
+    "Jhargram": "झाड़ग्राम",
+    "Belpahari": "बेलपहाड़ी",
+    "Santiniketan": "शांतिनिकेतन",
+    "Bakreshwar": "बक्रेश्वर",
+    "Kankalitala": "कंकालीतला",
+    "Nabadwip": "नवद्वीप",
+    "Murshidabad": "मुर्शिदाबाद",
+    "Katra Mosque": "कटरा मस्जिद",
+    "Sagar Island": "सागर द्वीप",
+    "Sundarbans": "सुंदरबन",
+    "Shankarpur": "शंकरपुर",
+    "Cooch Behar Palace": "कूचबिहार पैलेस",
+    "Rasikbil": "रसिकबिल",
+    "Dooars": "डुआर्स",
+    "Duars": "डुआर्स"
   }
 },
   bn: {
@@ -1556,7 +1616,37 @@ export const translations: Record<Language, Translations> = {
     "Mousuni Island": "মৌসুনি দ্বীপ",
     "Tajpur": "তাজপুর",
     "Mandarmani": "মন্দারমণি",
-    "Digha": "দিঘা"
+    "Digha": "দিঘা",
+    "Jaldapara": "জলদাপাড়া",
+    "Buxa": "বক্সা",
+    "Buxa Fort": "বক্সা দুর্গ",
+    "Jayanti": "জয়ন্তী",
+    "Chilapata": "চিলাপাতা",
+    "Gorumara": "গোরুমারা",
+    "Chapramari": "চাপড়ামারি",
+    "Lataguri": "লাটাগুড়ি",
+    "Murti": "মূর্তি",
+    "Mirik": "মিরিক",
+    "Kurseong": "কার্শিয়াং",
+    "Sandakphu": "সান্দাকফু",
+    "Susunia": "সুশুনিয়া",
+    "Joypur Forest": "জয়পুর জঙ্গল",
+    "Gongoni": "গনগনি",
+    "Jhargram": "ঝাড়গ্রাম",
+    "Belpahari": "বেলপাহাড়ি",
+    "Santiniketan": "শান্তিনিকেতন",
+    "Bakreshwar": "বক্রেশ্বর",
+    "Kankalitala": "কঙ্কালীতলা",
+    "Nabadwip": "নবদ্বীপ",
+    "Murshidabad": "মুর্শিদাবাদ",
+    "Katra Mosque": "কাটরা মসজিদ",
+    "Sagar Island": "সাগর দ্বীপ",
+    "Sundarbans": "সুন্দরবন",
+    "Shankarpur": "শঙ্করপুর",
+    "Cooch Behar Palace": "কোচবিহার রাজবাড়ি",
+    "Rasikbil": "রসিকবিল",
+    "Dooars": "ডুয়ার্স",
+    "Duars": "ডুয়ার্স"
   }
 }
 };
@@ -1701,3 +1791,51 @@ export function formatDuration(days: number | string | undefined, lang: Language
   }
   return `${d} ${d === 1 ? 'Day' : 'Days'}`;
 }
+
+/**
+ * Formats destination address consistently across languages without English mixing.
+ */
+export function formatAddress(
+  name: string | undefined,
+  district: string | undefined,
+  _rawAddress: string | undefined,
+  lang: Language
+): string {
+  const locName = localizeDestinationName(name, lang);
+  const locDist = localizeRegion(district, lang);
+  const locState = translate(lang, 'regions.westBengal');
+
+  if (locName && locDist) {
+    return `${locName}, ${locDist}, ${locState}`;
+  }
+  if (locDist) {
+    return `${locDist}, ${locState}`;
+  }
+  return locState;
+}
+
+/**
+ * Formats destination summary description cleanly across EN, HI, and BN without language mixing.
+ */
+export function formatDestinationDescription(
+  rec: { name?: string; district?: string; description?: string },
+  lang: Language
+): string {
+  const locName = localizeDestinationName(rec.name, lang);
+  const locDist = localizeRegion(rec.district, lang);
+  const desc = (rec.description || '').trim();
+
+  if (lang === 'bn') {
+    if (/[\u0980-\u09FF]/.test(desc)) return desc;
+    return `${locDist}-এর ${locName} কম ভিড় এবং উচ্চ প্রশান্তি সহ একটি মনোরম অফবিট গন্তব্য।`;
+  }
+  if (lang === 'hi') {
+    if (/[\u0900-\u097F]/.test(desc)) return desc;
+    return `${locDist} स्थित ${locName} कम भीड़ और उच्च प्राकृतिक सुंदरता वाला एक शांत ऑफबीट गंतव्य है।`;
+  }
+  if (!/[\u0900-\u097F\u0980-\u09FF]/.test(desc) && desc) {
+    return desc;
+  }
+  return `${locName} in ${locDist} offers a calibrated offbeat detour with high scenic value and low crowd congestion.`;
+}
+

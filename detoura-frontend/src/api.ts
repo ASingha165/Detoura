@@ -1,5 +1,12 @@
 import fallbackDestinations from './data/destinations.json';
 import { auth } from './firebase';
+import {
+  localizeDestinationName,
+  localizeRegion,
+  localizeCategory,
+  formatAddress,
+  type Language
+} from './i18n/translations';
 
 /**
  * Resolves the backend base URL with strict priority:
@@ -459,7 +466,10 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
     dest = rawList[0];
   }
 
-  const activeLang = request.language || localStorage.getItem('detoura_language') || 'en';
+  const activeLang = (request.language || (typeof localStorage !== 'undefined' ? localStorage.getItem('detoura_language') : null) || 'en') as Language;
+  const locName = localizeDestinationName(dest.name, activeLang);
+  const locDistrict = localizeRegion(dest.district, activeLang);
+  const locAddress = formatAddress(dest.name, dest.district, undefined, activeLang);
   const name = dest.name || 'Destination';
   const district = dest.district || 'West Bengal';
   const category = (dest.category || 'Nature').toLowerCase();
@@ -541,9 +551,9 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
 
   let explanation = '';
   if (activeLang === 'bn') {
-    explanation = `আপনার ট্রাভেল ডিএনএ-র সাথে ${Math.round(match_score * 100)}% সামঞ্জস্যপূর্ণ শীর্ষ ম্যাচ। ${district}-এর ${name} চমৎকার ${focusBn}, ${monthNameBn}-এ আরামদায়ক আবহাওয়া (SSI ${ssiVal.toFixed(2)}) এবং কম ভিড়ের সূচক (${cpiVal.toFixed(2)}) সহ ${Math.round(undVal * 100)}% প্রশান্তি রেটিং নিশ্চিত করে।`;
+    explanation = `আপনার ট্রাভেল ডিএনএ-র সাথে ${Math.round(match_score * 100)}% সামঞ্জস্যপূর্ণ শীর্ষ ম্যাচ। ${locDistrict}-এর ${locName} চমৎকার ${focusBn}, ${monthNameBn}-এ আরামদায়ক আবহাওয়া (SSI ${ssiVal.toFixed(2)}) এবং কম ভিড়ের সূচক (${cpiVal.toFixed(2)}) সহ ${Math.round(undVal * 100)}% প্রশান্তি রেটিং নিশ্চিত করে।`;
   } else if (activeLang === 'hi') {
-    explanation = `आपके यात्रा डीएनए के साथ ${Math.round(match_score * 100)}% मेल खाता हुआ शीर्ष विकल्प। ${district} स्थित ${name} उत्कृष्ट ${focusHi}, ${monthNameHi} में सुखद मौसम (SSI ${ssiVal.toFixed(2)}) और कम भीड़ दबाव (${cpiVal.toFixed(2)}) के साथ ${Math.round(undVal * 100)}% शांति रेटिंग प्रदान करता है।`;
+    explanation = `आपके यात्रा डीएनए के साथ ${Math.round(match_score * 100)}% मेल खाता हुआ शीर्ष विकल्प। ${locDistrict} स्थित ${locName} उत्कृष्ट ${focusHi}, ${monthNameHi} में सुखद मौसम (SSI ${ssiVal.toFixed(2)}) और कम भीड़ दबाव (${cpiVal.toFixed(2)}) के साथ ${Math.round(undVal * 100)}% शांति रेटिंग प्रदान करता है।`;
   } else {
     explanation = `Calibrated with your Travel DNA (${Math.round(match_score * 100)}% match). ${name} in ${district} features ${focusEn} with high seasonal comfort (${monthNameEn} SSI ${ssiVal.toFixed(2)}), secluded atmosphere (Crowd Index ${cpiVal.toFixed(2)}), and a ${Math.round(undVal * 100)}% tranquility rating.`;
   }
@@ -568,7 +578,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
       ];
     } else {
       activities = [
-        { activity: `${name}-এর প্রাকৃতিক সৌন্দর্য অন্বেষণ`, score: 1.0 },
+        { activity: `${locName}-এর প্রাকৃতিক সৌন্দর্য অন্বেষণ`, score: 1.0 },
         { activity: 'স্থানীয় ঐতিহ্য ও ল্যান্ডস্কেপ ফটোগ্রাফি', score: 0.9 },
         { activity: 'আঞ্চলিক লোকসংস্কৃতি ও খাবারের স্বাদ', score: 0.8 },
         { activity: 'মনোরম পরিবেশে শান্ত বিশ্রাম', score: 0.7 }
@@ -576,7 +586,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
     }
     itinerary = {
       'Day 1': {
-        morning: `আগমন ও ${name} পরিদর্শন`,
+        morning: `আগমন ও ${locName} পরিদর্শন`,
         afternoon: 'নির্দিষ্ট প্রাকৃতিক অঞ্চলে পদযাত্রা ও ফটোগ্রাফি',
         evening: 'স্থানীয় সুস্বাদু খাবার ও বিশ্রাম'
       },
@@ -608,7 +618,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
       ];
     } else {
       activities = [
-        { activity: `${name} का प्राकृतिक परिभ्रमण`, score: 1.0 },
+        { activity: `${locName} का प्राकृतिक परिभ्रमण`, score: 1.0 },
         { activity: 'परिदृश्य फोटोग्राफी एवं सैर', score: 0.9 },
         { activity: 'स्थानीय खानपान एवं संस्कृति की खोज', score: 0.8 },
         { activity: 'शांत वातावरण में विश्राम', score: 0.7 }
@@ -616,7 +626,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
     }
     itinerary = {
       'Day 1': {
-        morning: `आगमन एवं ${name} का अवलोकन`,
+        morning: `आगमन एवं ${locName} का अवलोकन`,
         afternoon: 'फोटोग्राफी एवं पैदल मार्ग अन्वेषण',
         evening: 'स्थानीय भोजन एवं विश्राम'
       },
@@ -691,7 +701,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
       category: dest.category || 'Nature',
       latitude: dest.latitude || 25.4786,
       longitude: dest.longitude || 88.9072,
-      address: `${name}, ${district}, West Bengal`,
+      address: locAddress,
       state: 'West Bengal'
     },
     destination_intelligence: {
@@ -702,7 +712,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
       budget_tier: bTier,
       estimated_daily_inr: dailyCost,
       name,
-      address: `${name}, ${district}, West Bengal`,
+      address: locAddress,
       district,
       state: 'West Bengal',
       distance_from_user_km: distKm
@@ -720,7 +730,7 @@ export function synthesizeOfflineIntelligence(request: RecommendRequest): Model3
     location: {
       latitude: dest.latitude || 25.4786,
       longitude: dest.longitude || 88.9072,
-      address: `${name}, ${district}, West Bengal`,
+      address: locAddress,
       district,
       state: 'West Bengal'
     },
@@ -849,7 +859,7 @@ export function computeOfflineRecommendations(request: RecommendRequest, activeL
     const match_score = Math.min(Math.max(rawScore / maxScore, 0.65), 0.98);
     const dailyBudget = dest.estimated_daily_inr ? Math.round(dest.estimated_daily_inr) : (dest.budget_tier === 1 ? 1200 : dest.budget_tier === 3 ? 3500 : 2000);
     const durationDays = dest.category?.toLowerCase().includes('hill') || (calculatedDist && calculatedDist > 300) ? 3 : (calculatedDist && calculatedDist > 150) ? 2 : 1;
-    const verifiedAddr = `${dest.name}, ${dest.district || 'West Bengal'}, West Bengal`;
+    const verifiedAddr = formatAddress(dest.name, dest.district, undefined, activeLang as Language);
 
     let focusLabel = 'Regional Discovery';
     if ((dest.nature ?? 0) >= 0.8) focusLabel = 'Pristine Wilderness';
@@ -865,28 +875,32 @@ export function computeOfflineRecommendations(request: RecommendRequest, activeL
     ];
 
     if (activeLang === 'bn') {
+      const locName = localizeDestinationName(dest.name, 'bn');
+      const locDist = localizeRegion(dest.district, 'bn');
       let focusLabelBn = 'আঞ্চলিক অন্বেষণ';
       if ((dest.nature ?? 0) >= 0.8) focusLabelBn = 'গভীর অরণ্য ও বন্যপ্রাণী';
       else if ((dest.culture ?? 0) >= 0.8) focusLabelBn = 'সমৃদ্ধ ঐতিহাসিক ঐতিহ্য';
       else if ((dest.relaxation ?? 0) >= 0.8) focusLabelBn = 'শান্তিময় নিরিবিলি আশ্রয়';
       else if ((dest.adventure ?? 0) >= 0.8) focusLabelBn = 'রোমাঞ্চকর প্রাকৃতিক পথ';
 
-      desc = `DETOURA ${dest.district || 'পশ্চিমবঙ্গ'}-এর ${dest.name}-কে ${Math.round(match_score * 100)}% সামঞ্জস্যে নির্বাচন করেছে। ${focusLabelBn}, আবহাওয়া সূচক ${ssi.toFixed(2)} এবং ভিড়ের সূচক (${cpi.toFixed(2)}) যুক্ত।`;
+      desc = `DETOURA ${locDist}-এর ${locName}-কে ${Math.round(match_score * 100)}% সামঞ্জস্যে নির্বাচন করেছে। ${focusLabelBn}, আবহাওয়া সূচক ${ssi.toFixed(2)} এবং ভিড়ের সূচক (${cpi.toFixed(2)}) যুক্ত।`;
       highlights = [
-        dest.district ? `জেলা: ${dest.district}` : 'মনোরম বাংলা',
+        dest.district ? `জেলা: ${locDist}` : 'মনোরম বাংলা',
         focusLabelBn,
         dest.budget_tier === 1 ? 'বাজেট বান্ধব' : dest.budget_tier === 3 ? 'প্রিমিয়াম ঐতিহ্য' : 'পরিমিত স্বাচ্ছন্দ্য'
       ];
     } else if (activeLang === 'hi') {
+      const locName = localizeDestinationName(dest.name, 'hi');
+      const locDist = localizeRegion(dest.district, 'hi');
       let focusLabelHi = 'क्षेत्रीय अन्वेषण';
       if ((dest.nature ?? 0) >= 0.8) focusLabelHi = 'प्राकृतिक सौंदर्य एवं वन्यजीव';
       else if ((dest.culture ?? 0) >= 0.8) focusLabelHi = 'ऐतिहासिक सांस्कृतिक धरोहर';
       else if ((dest.relaxation ?? 0) >= 0.8) focusLabelHi = 'शांत सुकून भरा विश्राम';
       else if ((dest.adventure ?? 0) >= 0.8) focusLabelHi = 'रोमांचक प्राकृतिक मार्ग';
 
-      desc = `DETOURA ने ${dest.district || 'पश्चिम बंगाल'} स्थित ${dest.name} को ${Math.round(match_score * 100)}% मेल के साथ चुना है। ${focusLabelHi}, मौसमी सूचकांक ${ssi.toFixed(2)} और कम भीड़ (${cpi.toFixed(2)}) शामिल है।`;
+      desc = `DETOURA ने ${locDist} स्थित ${locName} को ${Math.round(match_score * 100)}% मेल के साथ चुना है। ${focusLabelHi}, मौसमी सूचकांक ${ssi.toFixed(2)} और कम भीड़ (${cpi.toFixed(2)}) शामिल है।`;
       highlights = [
-        dest.district ? `ज़िला: ${dest.district}` : 'सुंदर बंगाल',
+        dest.district ? `ज़िला: ${locDist}` : 'सुंदर बंगाल',
         focusLabelHi,
         dest.budget_tier === 1 ? 'बजट अनुकूल' : dest.budget_tier === 3 ? 'प्रीमियम हेरिटेज' : 'मध्यम आराम'
       ];
@@ -1022,7 +1036,7 @@ export const getRecommendations = async (request: RecommendRequest): Promise<Rec
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify({ ...request, language: activeLang }),
     }, 10000);
 
     if (response.ok) {
@@ -1039,7 +1053,7 @@ export const getRecommendations = async (request: RecommendRequest): Promise<Rec
             calculatedDist = Math.round(calculateHaversineDistance(request.user_lat, request.user_lon, rec.latitude, rec.longitude) * 10) / 10;
           }
           const durationDays = rec.category?.toLowerCase().includes('hill') || (calculatedDist && calculatedDist > 300) ? 3 : (calculatedDist && calculatedDist > 150) ? 2 : 1;
-          const verifiedAddr = rec.address || (rec.district ? `${rec.name}, ${rec.district}, West Bengal` : 'West Bengal');
+          const verifiedAddr = formatAddress(rec.name, rec.district, rec.address, activeLang as Language);
 
           let focusLabel = 'Regional Detour';
           if ((rec.similarity_score || 0) >= 0.85) focusLabel = 'High DNA Affinity';
@@ -1053,17 +1067,23 @@ export const getRecommendations = async (request: RecommendRequest): Promise<Rec
             rec.budget_tier === 1 ? 'Budget Friendly' : rec.budget_tier === 3 ? 'Premium Heritage' : 'Moderate Comfort'
           ];
           if (activeLang === 'bn') {
-            desc = `DETOURA আপনার ট্রাভেল ডিএনএ-র সাথে ${rec.district || 'পশ্চিমবঙ্গ'}-এর ${rec.name} মিলিয়েছে (${Math.round(match_score * 100)}% ম্যাচ)। আবহাওয়া সূচক ${(rec.ssi || 0.9).toFixed(2)} সহ শান্ত পরিবেশ।`;
+            const locName = localizeDestinationName(rec.name, 'bn');
+            const locDistrict = localizeRegion(rec.district, 'bn');
+            const locCategory = localizeCategory(rec.category, 'bn');
+            desc = `DETOURA আপনার ট্রাভেল ডিএনএ-র সাথে ${locDistrict}-এর ${locName} মিলিয়েছে (${Math.round(match_score * 100)}% ম্যাচ)। আবহাওয়া সূচক ${(rec.ssi || 0.9).toFixed(2)} সহ শান্ত পরিবেশ।`;
             highlights = [
-              rec.district ? `জেলা: ${rec.district}` : 'মনোরম বাংলা',
-              rec.category ? `ধরণ: ${rec.category}` : 'অফবিট রুট',
+              rec.district ? `জেলা: ${locDistrict}` : 'মনোরম বাংলা',
+              rec.category ? `ধরণ: ${locCategory}` : 'অফবিট রুট',
               rec.budget_tier === 1 ? 'বাজেট বান্ধব' : rec.budget_tier === 3 ? 'প্রিমিয়াম ঐতিহ্য' : 'পরিমিত স্বাচ্ছন্দ্য'
             ];
           } else if (activeLang === 'hi') {
-            desc = `DETOURA ने आपके यात्रा डीएनए के साथ ${rec.district || 'पश्चिम बंगाल'} स्थित ${rec.name} को मेल कराया है (${Math.round(match_score * 100)}% मेल)। सुखद मौसमी स्थिति के साथ शांत गंतव्य।`;
+            const locName = localizeDestinationName(rec.name, 'hi');
+            const locDistrict = localizeRegion(rec.district, 'hi');
+            const locCategory = localizeCategory(rec.category, 'hi');
+            desc = `DETOURA ने आपके यात्रा डीएनए के साथ ${locDistrict} स्थित ${locName} को मेल कराया है (${Math.round(match_score * 100)}% मेल)। सुखद मौसमी स्थिति के साथ शांत गंतव्य।`;
             highlights = [
-              rec.district ? `ज़िला: ${rec.district}` : 'सुंदर बंगाल',
-              rec.category ? `श्रेणी: ${rec.category}` : 'ऑफबीट मार्ग',
+              rec.district ? `ज़िला: ${locDistrict}` : 'सुंदर बंगाल',
+              rec.category ? `श्रेणी: ${locCategory}` : 'ऑफबीट मार्ग',
               rec.budget_tier === 1 ? 'बजट अनुकूल' : rec.budget_tier === 3 ? 'प्रीमियम हेरिटेज' : 'मध्यम आराम'
             ];
           }
@@ -1288,10 +1308,12 @@ export interface ChatResponse {
 
 function generateOfflineChatResponse(request: ChatRequest): ChatResponse {
   const lang = (request.language || 'en').toLowerCase();
+  const langTyped = (lang === 'bn' || lang === 'hi' ? lang : 'en') as Language;
   const q = request.message.toLowerCase();
   const ctx = request.context || {};
-  const name = ctx.destination_name || 'this destination';
-  const district = ctx.district || 'West Bengal';
+  const rawName = ctx.destination_name || 'this destination';
+  const name = localizeDestinationName(rawName, langTyped);
+  const district = localizeRegion(ctx.district || 'West Bengal', langTyped);
   const dist = ctx.distance_km;
 
   // 1. Distance question
@@ -1432,13 +1454,13 @@ function generateOfflineChatResponse(request: ChatRequest): ChatResponse {
   // General fallback
   if (lang === 'bn') {
     return {
-      response: `DETOURA-তে স্বাগতম। ${name} পশ্চিমবঙ্গের ${district} জেলায় অবস্থিত একটি অফবিট গন্তব্য (${ctx.category || 'প্রকৃতি'})। এর শান্ত পরিবেশ এবং আঞ্চলিক সৌন্দর্য উপভোগ করার জন্য এটি আদর্শ।`,
+      response: `DETOURA-তে স্বাগতম। ${name} পশ্চিমবঙ্গের ${district} জেলায় অবস্থিত একটি অফবিট গন্তব্য (${localizeCategory(ctx.category, 'bn')})। এর শান্ত পরিবেশ এবং আঞ্চলিক সৌন্দর্য উপভোগ করার জন্য এটি আদর্শ।`,
       language: lang,
       source: 'grounded_offline'
     };
   } else if (lang === 'hi') {
     return {
-      response: `डेटूरा में स्वागत है। ${name} पश्चिम बंगाल के ${district} ज़िले में स्थित एक शांत ऑफबीट स्थल (${ctx.category || 'प्रकृति'}) है, जो प्रकृति प्रेमियों के लिए अनुकूल है।`,
+      response: `डेटूरा में स्वागत है। ${name} पश्चिम बंगाल के ${district} ज़िले में स्थित एक शांत ऑफबीट स्थल (${localizeCategory(ctx.category, 'hi')}) है, जो प्रकृति प्रेमियों के लिए अनुकूल है।`,
       language: lang,
       source: 'grounded_offline'
     };

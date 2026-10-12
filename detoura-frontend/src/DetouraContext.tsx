@@ -22,7 +22,9 @@ import {
   localizeRegion as localizeRegionHelper,
   localizeDestinationName as localizeDestinationNameHelper,
   formatPricePerDay as formatPricePerDayHelper,
-  formatDuration as formatDurationHelper
+  formatDuration as formatDurationHelper,
+  formatAddress as formatAddressHelper,
+  formatDestinationDescription as formatDestinationDescriptionHelper
 } from './i18n/translations';
 
 export interface DetouraContextType {
@@ -44,6 +46,8 @@ export interface DetouraContextType {
   localizeDestinationName: (name?: string) => string;
   formatPricePerDay: (amount?: number | string) => string;
   formatDuration: (days?: number | string) => string;
+  formatAddress: (name?: string, district?: string, address?: string) => string;
+  formatDestinationDescription: (rec: { name?: string; district?: string; description?: string }) => string;
   // Season / Month state
   seasonMode: 'current' | 'custom';
   setSeasonMode: (mode: 'current' | 'custom') => void;
@@ -599,6 +603,8 @@ export function DetouraProvider({ children }: { children: ReactNode }) {
         localizeDestinationName: (name?: string) => localizeDestinationNameHelper(name, language),
         formatPricePerDay: (amount?: number | string) => formatPricePerDayHelper(amount, language),
         formatDuration: (days?: number | string) => formatDurationHelper(days, language),
+        formatAddress: (name?: string, district?: string, address?: string) => formatAddressHelper(name, district, address, language),
+        formatDestinationDescription: (rec: { name?: string; district?: string; description?: string }) => formatDestinationDescriptionHelper(rec, language),
       }}
     >
       {children}
@@ -623,7 +629,9 @@ export function useTranslation() {
     localizeRegion,
     localizeDestinationName,
     formatPricePerDay,
-    formatDuration
+    formatDuration,
+    formatAddress,
+    formatDestinationDescription
   } = useDetoura();
 
   return {
@@ -634,6 +642,8 @@ export function useTranslation() {
     localizeRegion,
     localizeDestinationName,
     formatPricePerDay,
-    formatDuration
+    formatDuration,
+    formatAddress,
+    formatDestinationDescription
   };
 }

@@ -24,6 +24,8 @@ export const AskDetouraDrawer: React.FC = () => {
   const {
     language,
     t,
+    localizeDestinationName,
+    localizeRegion,
     activeIntelligence,
     recommendations,
     userLocation,
@@ -182,10 +184,12 @@ export const AskDetouraDrawer: React.FC = () => {
       console.warn('Chat notice:', err);
       let fallbackText = 'Sorry, I encountered an issue retrieving an answer. Please try again.';
       if (currentDest) {
+        const locName = localizeDestinationName(currentDest.name);
+        const locDist = localizeRegion(currentDest.district);
         if (language === 'bn') {
-          fallbackText = `${currentDest.name} পশ্চিমবঙ্গের ${currentDest.district || 'পশ্চিমবঙ্গ'} জেলায় অবস্থিত একটি অফবিট গন্তব্য। আপনার ট্রাভেল ডিএনএ-র সাথে এর শান্ত প্রাকৃতিক পরিবেশ চমৎকারভাবে মেলে।`;
+          fallbackText = `${locName} পশ্চিমবঙ্গের ${locDist} জেলায় অবস্থিত একটি অফবিট গন্তব্য। আপনার ট্রাভেল ডিএনএ-র সাথে এর শান্ত প্রাকৃতিক পরিবেশ চমৎকারভাবে মেলে।`;
         } else if (language === 'hi') {
-          fallbackText = `${currentDest.name} पश्चिम बंगाल के ${currentDest.district || 'पश्चिम बंगाल'} ज़िले में स्थित है। यह एक सुंदर और शांत ऑफबीট स्थल है।`;
+          fallbackText = `${locName} पश्चिम बंगाल के ${locDist} ज़िले में स्थित है। यह एक सुंदर और शांत ऑफबीट स्थल है।`;
         } else {
           fallbackText = `${currentDest.name} is a verified offbeat destination in ${currentDest.district || 'West Bengal'}, West Bengal, calibrated for low crowds and authentic experiences.`;
         }
@@ -289,7 +293,7 @@ export const AskDetouraDrawer: React.FC = () => {
                   {currentDest ? (
                     <span className="inline-flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px] text-primary">location_on</span>
-                      <strong className="text-on-surface">{currentDest.name}</strong>
+                      <strong className="text-on-surface">{localizeDestinationName(currentDest.name)}</strong>
                     </span>
                   ) : (
                     t('chatbot.subtitle')
